@@ -39,7 +39,7 @@ $isAddingDateStrings = $false
 
 
 # -Recurse looks into all subdirectories.  Leave the option out to only look at current directory.
-$AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path "$basepath\Paul's iPhone\" -Include "*.jpg"
+$AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path "$basepath\Work Testing\" -Include "*.jpg"
 # Filter down to only File Objects:
 $files = $AllChildren | Where-Object { !$_.PSisContainer }
 $num = 1
@@ -124,20 +124,21 @@ foreach ($file in $files) {
         $Name_Date_Str = "$nameOnly"
     }
 
-    # Continue looping through names until finding a file:
-    $count = 0
-    do {
-        $count_str = ([string]$count).PadLeft(3, '0')
-        if ($isAddingCountString) {
+    if ($isAddingCountString) {
+
+        # Continue looping through names until finding a file:
+        $count = 0
+        do {
+            $count_str = ([string]$count).PadLeft(3, '0')
             $newName = "$Name_Date_Str@$count_str$extOnly"
-        } else {
-            $newName = "$nameOnly$extOnly"
-        }
-        # "New Location: $newPath$newName"
-        $count++
+            # "New Location: $newPath$newName"
+            $count++
 
-    } while (Test-Path "$newPath$newName")
+        } while (Test-Path "$newPath$newName")
 
+    } else {
+        $newName = "$nameOnly$extOnly"
+    }
 
     # Display the new path and name:
     "New path: $newPath"
