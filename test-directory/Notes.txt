@@ -1,0 +1,22 @@
+Notes:
+
+General stuff:
+• If seeing anything of interest in code or on docs or anything, let Corey or others know and maybe I can work on that.
+
+
+
+Work:
+
+• Maybe work with Thane on the ADC for the battery sensing on Bobcat Raven?
+	• Create CLI command?
+	• CLIExample.cpp
+	• Create command to read GPIO ADC pins
+
+• Learning on CMake?
+
+• Tera Term
+• Docklite Scripting in owncloud in eng/software/  Grab zip and liscense
+
+
+• Branch off master to adc_testing
+

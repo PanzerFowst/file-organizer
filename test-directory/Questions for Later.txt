@@ -1,0 +1,4 @@
+Questions for later:
+
+• What is a PR?
+• What is a .clang-format?
