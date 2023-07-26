@@ -10,8 +10,36 @@
 
 
 
+#################################
+## Configurable Options Below: ##
+## Recommend running with      ##
+## isReadOnly set to true      ##
+## until satisfied with output ##
+#################################
+
+# Basepath / directory (set this to make the "home directory out of which everything is created."):
+$basepath = "c:\Users\The Machine\Pictures"
+$destinationpath = "c:\Users\The Machine\Pictures\Work Testing"
+
+# Read Only (If true, just prints potential files to console without copying or moving the files):
+$isReadOnly = $true
+
+# Directory Creation (Should the script create folders if they don't exist?):
+$isCreatingDirectories = $false
+# Copy or Move file:
+#   If true, script moves and modifies the original file.
+#   If false, script copies files without modifying old file.
+$isTouchingOriginalFiles = $true
+# Add count string to file end:
+#   Should the script add "@000" to the end in cases of same file names?
+#   Example: file@000.txt, file@001.txt, file@002.txt, fileCOOL@000.txt
+$isAddingCountString = $false
+# Add datestrings to end of file (Should the script add a datestring to the file name?):
+$isAddingDateStrings = $false
+
+
 # -Recurse looks into all subdirectories.  Leave the option out to only look at current directory.
-$AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path ".\2023-02\2023-02-18\" #*.bat"
+$AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path "$basepath\Paul's iPhone\" -Include "*.jpg"
 # Filter down to only File Objects:
 $files = $AllChildren | Where-Object { !$_.PSisContainer }
 $num = 1
@@ -63,11 +91,12 @@ foreach ($file in $files) {
     $Date_Str = "$Year_Str-$Month_Str-$Day_Str#$Time_Str"
     $Date_Str = $Date_Str.Replace('#', '__')
     # Finally Create the new Path:
-    $newPath = ".\$Year_Str-$Month_Str\$Year_Str-$Month_Str-$Day_Str\"
+    $newPath = "$destinationpath\$Year_Str-$Month_Str\$Year_Str-$Month_Str-$Day_Str\"
 
 
     # File Renaming:
     $nameOnly = $fileObj.Name
+    $extOnly = $fileObj.Extension
     $oldPath = $fileObj.PSParentPath
     # Remove extention:
     if ($fileObj.Extension.length -gt 0) {
@@ -80,26 +109,35 @@ foreach ($file in $files) {
     # $nameOnly = 'something'
 
 
-    # Some test stuff to see if need to rename files:
-    # "nameOnly: $nameOnly`t`tDate_Str: $Date_Str"
-    if ($nameOnly -match $Date_Str) {
+    if ($isAddingDateStrings) {
 
-        # "Name already contains created date!  Skip renaming process..."
-        $Name_Date_Str = "$nameOnly"
+        # "nameOnly: $nameOnly`t`tDate_Str: $Date_Str"
+        # Some test stuff to see if need to rename files:
+        if ($nameOnly -match $Date_Str) {
+            # "Name already contains created date!  Skip renaming process..."
+            $Name_Date_Str = "$nameOnly"
+        } else {
+            $Name_Date_Str = "$nameOnly---$Date_Str"
+        }
 
     } else {
-        $Name_Date_Str = "$nameOnly---$Date_Str"
+        $Name_Date_Str = "$nameOnly"
     }
 
     # Continue looping through names until finding a file:
     $count = 0
     do {
         $count_str = ([string]$count).PadLeft(3, '0')
-        $newName = "$Name_Date_Str@$count_str"
+        if ($isAddingCountString) {
+            $newName = "$Name_Date_Str@$count_str$extOnly"
+        } else {
+            $newName = "$nameOnly$extOnly"
+        }
         # "New Location: $newPath$newName"
         $count++
 
     } while (Test-Path "$newPath$newName")
+
 
     # Display the new path and name:
     "New path: $newPath"
@@ -111,26 +149,80 @@ foreach ($file in $files) {
     ######################################################################################
 
     $num--
-    # Directory Creation:
-    # if (!(Test-Path $newPath)) {
 
-    #     "Path doesn't exist!  Creating path..."
-    #     New-Item -ItemType Directory -Path "$newPath"
-    # }
+    if (!($isReadOnly)) {
 
-    # Copy/Rename/Move file:
-    # "Copying file..."
-    # Copy-Item "$fileObj" "$newPath$newName"
-    # "Renaming file..."
-    Rename-Item "$fileObj" "$newname"
-    # "Moving file..."
-    Move-Item -Path "$oldPath\$newName" -Destination "$newPath"
+        # Directory Creation:
+        if ($isCreatingDirectories -and !(Test-Path $newPath)) {
 
-    # Change File Attributes after the fact (make sure to check that $CreationDate is uncommented above):
-    # (Get-Item "$newPath$newName").CreationTime=$CreationDate #("18 February 2023 02:08:23")
-    # (Get-Item "$newPath$newName").LastWriteTime=("16 January 2022 11:00:00")
+            "Path doesn't exist!  Creating path..."
+            New-Item -ItemType Directory -Path "$newPath"
+        }
 
+        # Copy/Rename/Move file:
+        if ($isTouchingOriginalFiles) {
+
+            "Renaming file..."
+            Rename-Item "$fileObj" "$newname"
+            "Moving file..."
+            Move-Item -Path "$oldPath\$newName" -Destination "$newPath"
+
+        } else {
+
+            "Copying file..."
+            Copy-Item "$fileObj" "$newPath$newName"
+        }
+
+        # Change File Attributes after the fact (make sure to check that $CreationDate is uncommented above):
+        # (Get-Item "$newPath$newName").CreationTime=$CreationDate #("18 February 2023 02:08:23")
+        # (Get-Item "$newPath$newName").LastWriteTime=("16 January 2022 11:00:00")
+    }
 
     # Extra space between loop iterations:
     "`n"
 }
+
+
+# Final output:
+"`n`n******************************************************************************`n"
+
+if ($isCreatingDirectories) {
+    "Potentially new directories created!"
+} else {
+    "Did not create any directories."
+}
+
+# For spacing:
+""
+
+if ($isReadOnly) {
+
+    "Did not change any files."
+
+    if ($isTouchingOriginalFiles) {
+        "Would have moved files to the above locations..."
+    } else {
+        "Would have copied files to the above locations..."
+    }
+    
+} else {
+
+    if ($isTouchingOriginalFiles) {
+        "Moved files to the above locations..."
+    } else {
+        "Copied files to the above locations..."
+    }
+}
+
+# For spacing:
+""
+
+if ($isAddingCountString) {
+    "Added count strings (file@000.txt) to files."
+}
+
+if ($isAddingDateStrings) {
+    "Added date strings (file---2023-06-01__10;12;46.09325.txt)"
+}
+
+"`n`n"
