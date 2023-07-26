@@ -66,15 +66,68 @@ foreach ($file in $files) {
     # $CurrentDay = Get-Date -uformat "%d"
     # "Date Stamp: $CurrentDate"
     # Creation Date Data:
-    # $CreationDate = $fileObj.CreationTime.DateTime
-    $CreationYear = $fileObj.CreationTime.Year
-    $CreationMonth = $fileObj.CreationTime.Month
-    $CreationDay = $fileObj.CreationTime.Day
-    $CreationTimeOfDay = $fileObj.CreationTime.TimeOfDay
+    # # $CreationDate = $fileObj.CreationTime.DateTime
+    # $CreationYear = $fileObj.CreationTime.Year
+    # $CreationMonth = $fileObj.CreationTime.Month
+    # $CreationDay = $fileObj.CreationTime.Day
+    # $CreationTimeOfDay = $fileObj.CreationTime.TimeOfDay
     # "Creation Date: $CreationDate"
+
+
+
+
+
+    # TODO: Clean up this code chunk...
+    $shell = New-Object -ComObject Shell.Application
+    $dir = $shell.NameSpace( $fileObj.Directory.FullName )
+    $file = $dir.ParseName( $fileObj.Name )
+
+    # First see if we have Date Taken, which is at index 12
+    $index = 12
+    $value = ($dir.GetDetailsof($file, $index) -creplace '\P{IsBasicLatin}')# -replace "`u{200E}") -replace "`u{200F}"
+    # $value = "11/2/2022 9:24 AM"
+    # $date = Get-Date-Property-Value $fileObj 12 
+    # "date before: $value"
+    if ($value -and $value -ne '') {
+        
+        $date = [DateTime]::ParseExact($value, "g", $null)
+
+    }
+    else {
+        $date = $null
+        # If we don't have Date Taken, then find the oldest date from all date properties
+        0..287 | ForEach-Object {
+            $name = $dir.GetDetailsof($dir.items, $_)
+
+            if ( $name -match '(date)|(created)') {
+            
+                # Only get value if date field because the GetDetailsOf call is expensive
+                $tmp = ($dir.GetDetailsof($file, $_) -creplace '\P{IsBasicLatin}')
+                if ($tmp -and $tmp -ne '') {
+                    $tmp = [DateTime]::ParseExact($tmp, "g", $null)
+                }
+                else {
+                    $tmp = $null
+                }
+                if ( ($null -ne $tmp) -and (($null -eq $date) -or ($tmp -lt $date))) {
+                    $date = $tmp
+                }
+            }
+        }
+    }
+    # "date after: $date"
+    $CreationYear = $date.Year
+    $CreationMonth = $date.Month
+    $CreationDay = $date.Day
+    $CreationTimeOfDay = $date.TimeOfDay
+
+
     
+
+
+
     # File Extention:
-    # $extOnly = $fileObj.Extension
+    $extOnly = $fileObj.Extension
     # "Extension: $extOnly"
 
     # Path / Directory:
@@ -96,7 +149,6 @@ foreach ($file in $files) {
 
     # File Renaming:
     $nameOnly = $fileObj.Name
-    $extOnly = $fileObj.Extension
     $oldPath = $fileObj.PSParentPath
     # Remove extention:
     if ($fileObj.Extension.length -gt 0) {
@@ -116,11 +168,13 @@ foreach ($file in $files) {
         if ($nameOnly -match $Date_Str) {
             # "Name already contains created date!  Skip renaming process..."
             $Name_Date_Str = "$nameOnly"
-        } else {
+        }
+        else {
             $Name_Date_Str = "$nameOnly---$Date_Str"
         }
 
-    } else {
+    }
+    else {
         $Name_Date_Str = "$nameOnly"
     }
 
@@ -136,7 +190,8 @@ foreach ($file in $files) {
 
         } while (Test-Path "$newPath$newName")
 
-    } else {
+    }
+    else {
         $newName = "$nameOnly$extOnly"
     }
 
@@ -168,7 +223,8 @@ foreach ($file in $files) {
             "Moving file..."
             Move-Item -Path "$oldPath\$newName" -Destination "$newPath"
 
-        } else {
+        }
+        else {
 
             "Copying file..."
             Copy-Item "$fileObj" "$newPath$newName"
@@ -189,7 +245,8 @@ foreach ($file in $files) {
 
 if ($isCreatingDirectories) {
     "Potentially new directories created!"
-} else {
+}
+else {
     "Did not create any directories."
 }
 
@@ -202,15 +259,18 @@ if ($isReadOnly) {
 
     if ($isTouchingOriginalFiles) {
         "Would have moved files to the above locations..."
-    } else {
+    }
+    else {
         "Would have copied files to the above locations..."
     }
     
-} else {
+}
+else {
 
     if ($isTouchingOriginalFiles) {
         "Moved files to the above locations..."
-    } else {
+    }
+    else {
         "Copied files to the above locations..."
     }
 }
