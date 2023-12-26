@@ -18,30 +18,30 @@
 #################################
 
 # Basepath / directory (set this to make the "home directory out of which everything is created."):
-$basepath = "c:\Users\The Machine\Pictures"
-$destinationpath = "c:\Users\The Machine\Pictures\Work Testing"
+$basepath = "D:\Pictures"
+$destinationpath = "D:\Pictures-Output"
 
 # Read Only (If true, just prints potential files to console without copying or moving the files):
-$isReadOnly = $true
+$isReadOnly = $false
 
 # Directory Creation (Should the script create folders if they don't exist?):
-$isCreatingDirectories = $false
+$isCreatingDirectories = $true
 # Empty Directory Deletion (Should the script delete folders if they are empty?):
 $isDeletingEmptyDirectories = $true
 # Copy or Move file:
 #   If true, script moves and modifies the original file.
 #   If false, script copies files without modifying old file.
-$isTouchingOriginalFiles = $true
+$isTouchingOriginalFiles = $false
 # Add count string to file end:
 #   Should the script add "@000" to the end in cases of same file names?
 #   Example: file@000.txt, file@001.txt, file@002.txt, fileCOOL@000.txt
-$isAddingCountString = $false
+$isAddingCountString = $true
 # Add datestrings to end of file (Should the script add a datestring to the file name?):
 $isAddingDateStrings = $false
 
 
 # -Recurse looks into all subdirectories.  Leave the option out to only look at current directory.
-$AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path "$basepath\Work Testing\" -Include "*.jpg"
+$AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path "$basepath" -Include "*.jpg"
 # Filter down to only File Objects:
 $files = $AllChildren | Where-Object { !$_.PSisContainer }
 $num = 1
