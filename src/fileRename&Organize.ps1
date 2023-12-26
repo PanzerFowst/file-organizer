@@ -279,11 +279,11 @@ else {
 ""
 
 if ($isAddingCountString) {
-    "Added count strings (file@000.txt) to files."
+    "Added count strings (ex: file@000.txt) to files."
 }
 
 if ($isAddingDateStrings) {
-    "Added date strings (file---2023-06-01__10;12;46.09325.txt)"
+    "Added date strings (ex: file---2023-06-01__10;12;46.09325.txt)"
 }
 
 "`n`n"
