@@ -40,8 +40,10 @@ $isAddingCountString = $true
 $isAddingDateStrings = $false
 
 
-# -Recurse looks into all subdirectories.  Leave the option out to only look at current directory.
-$AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path "$basepath" -Include "*.jpg"
+# -Recurse looks into all subdirectories.  Leave the option out to only look at current
+# directory.  The results are piped into Where-Object which filters by file extension.
+$AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path "$basepath" |
+Where-Object { $_.Extension -match "(jpg|jpeg|png|raw)" }
 # Filter down to only File Objects:
 $files = $AllChildren | Where-Object { !$_.PSisContainer }
 $num = 1
