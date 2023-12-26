@@ -51,7 +51,7 @@ foreach ($file in $files) {
 "`n`n`n"
 
 
-$num = 0
+$num = 1
 # Loop through all the files:
 foreach ($file in $files) {
 
@@ -196,6 +196,7 @@ foreach ($file in $files) {
     }
 
     # Display the new path and name:
+    "Item #$num`:"
     "New path: $newPath"
     "New filename: $newName"
 
@@ -204,7 +205,7 @@ foreach ($file in $files) {
     ####################  ACTUAL FILE MODIFICATION BELOW THIS POINT!  ####################
     ######################################################################################
 
-    $num--
+    $num++
 
     if (!($isReadOnly)) {
 
