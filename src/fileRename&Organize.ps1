@@ -96,8 +96,7 @@ foreach ($file in $files) {
 
         $date = [DateTime]::ParseExact($value, "g", $null)
 
-    }
-    else {
+    } else {
         $date = $null
         # If we don't have Date Taken, then find the oldest date from all date properties
         0..287 | ForEach-Object {
@@ -109,8 +108,7 @@ foreach ($file in $files) {
                 $tmp = ($dir.GetDetailsof($file, $_) -creplace '\P{IsBasicLatin}')
                 if ($tmp -and $tmp -ne '') {
                     $tmp = [DateTime]::ParseExact($tmp, "g", $null)
-                }
-                else {
+                } else {
                     $tmp = $null
                 }
                 if ( ($null -ne $tmp) -and (($null -eq $date) -or ($tmp -lt $date))) {
@@ -171,13 +169,11 @@ foreach ($file in $files) {
         if ($nameOnly -match $Date_Str) {
             # "Name already contains created date!  Skip renaming process..."
             $Name_Date_Str = "$nameOnly"
-        }
-        else {
+        } else {
             $Name_Date_Str = "$nameOnly---$Date_Str"
         }
 
-    }
-    else {
+    } else {
         $Name_Date_Str = "$nameOnly"
     }
 
@@ -193,8 +189,7 @@ foreach ($file in $files) {
 
         } while (Test-Path "$newPath$newName")
 
-    }
-    else {
+    } else {
         $newName = "$nameOnly$extOnly"
     }
 
@@ -227,8 +222,7 @@ foreach ($file in $files) {
             "Moving file..."
             Move-Item -Path "$oldPath\$newName" -Destination "$newPath"
 
-        }
-        else {
+        } else {
 
             "Copying file..."
             Copy-Item "$fileObj" "$newPath$newName"
@@ -260,15 +254,13 @@ if ($isDeletingEmptyDirectories) {
 
 if ($isCreatingDirectories) {
     "Potentially new directories created!"
-}
-else {
+} else {
     "Did not create any directories."
 }
 
 if ($isDeletingEmptyDirectories) {
     "Deleted all empty folders in `"$basepath\`"!"
-}
-else {
+} else {
     "Did not check to delete empty directories in `"$basepath\`"."
 }
 
@@ -281,18 +273,15 @@ if ($isReadOnly) {
 
     if ($isTouchingOriginalFiles) {
         "Would have moved files to the above locations..."
-    }
-    else {
+    } else {
         "Would have copied files to the above locations..."
     }
 
-}
-else {
+} else {
 
     if ($isTouchingOriginalFiles) {
         "Moved files to the above locations..."
-    }
-    else {
+    } else {
         "Copied files to the above locations..."
     }
 }
