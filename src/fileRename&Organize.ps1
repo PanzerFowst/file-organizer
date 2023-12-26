@@ -88,10 +88,10 @@ foreach ($file in $files) {
     $index = 12
     $value = ($dir.GetDetailsof($file, $index) -creplace '\P{IsBasicLatin}')# -replace "`u{200E}") -replace "`u{200F}"
     # $value = "11/2/2022 9:24 AM"
-    # $date = Get-Date-Property-Value $fileObj 12 
+    # $date = Get-Date-Property-Value $fileObj 12
     # "date before: $value"
     if ($value -and $value -ne '') {
-        
+
         $date = [DateTime]::ParseExact($value, "g", $null)
 
     }
@@ -102,7 +102,7 @@ foreach ($file in $files) {
             $name = $dir.GetDetailsof($dir.items, $_)
 
             if ( $name -match '(date)|(created)') {
-            
+
                 # Only get value if date field because the GetDetailsOf call is expensive
                 $tmp = ($dir.GetDetailsof($file, $_) -creplace '\P{IsBasicLatin}')
                 if ($tmp -and $tmp -ne '') {
@@ -124,7 +124,6 @@ foreach ($file in $files) {
     $CreationTimeOfDay = $date.TimeOfDay
 
 
-    
 
 
 
@@ -284,7 +283,7 @@ if ($isReadOnly) {
     else {
         "Would have copied files to the above locations..."
     }
-    
+
 }
 else {
 
