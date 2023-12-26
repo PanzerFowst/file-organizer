@@ -26,6 +26,8 @@ $isReadOnly = $true
 
 # Directory Creation (Should the script create folders if they don't exist?):
 $isCreatingDirectories = $false
+# Empty Directory Deletion (Should the script delete folders if they are empty?):
+$isDeletingEmptyDirectories = $true
 # Copy or Move file:
 #   If true, script moves and modifies the original file.
 #   If false, script copies files without modifying old file.
@@ -240,6 +242,17 @@ foreach ($file in $files) {
     "`n"
 }
 
+# Credit: https://www.delftstack.com/howto/powershell/powershell-delete-empty-folders/
+if ($isDeletingEmptyDirectories) {
+    do {
+        $fetchedDirList = Get-ChildItem $basepath -Directory -Recurse
+        # (The -Force flag looks for hidden files and folders.)
+        $emptyDirectoryList = $fetchedDirList | Where-Object { (Get-ChildItem $_.fullName -Force).count -eq 0 }
+        $finalListToRemove = $emptyDirectoryList | Select-Object -ExpandProperty FullName
+        $finalListToRemove | ForEach-Object { Remove-Item $_ }
+    } while ($finalListToRemove.count -gt 0)
+}
+
 
 # Final output:
 "`n`n******************************************************************************`n"
@@ -249,6 +262,13 @@ if ($isCreatingDirectories) {
 }
 else {
     "Did not create any directories."
+}
+
+if ($isDeletingEmptyDirectories) {
+    "Deleted all empty folders in `"$basepath\`"!"
+}
+else {
+    "Did not check to delete empty directories in `"$basepath\`"."
 }
 
 # For spacing:
