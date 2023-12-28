@@ -2,4 +2,8 @@
     "[powershell]": {
         "editor.formatOnSave": false,
     },
+    "[markdown]": {
+        "files.trimTrailingWhitespace": false,
+        "editor.renderWhitespace": "trailing",
+    }
 }
