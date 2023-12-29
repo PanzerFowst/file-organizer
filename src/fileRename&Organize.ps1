@@ -78,10 +78,14 @@ Where-Object { $_.Extension -match "(jpg|jpeg|png|raw)" }
 # Filter down to only File Objects:
 $files = $AllChildren | Where-Object { !$_.PSisContainer }
 $num = 1
-"List of files:"
-foreach ($file in $files) {
-    "$num) $file"
-    $num++
+if ($files.count -gt 0) {
+    "List of files:"
+    foreach ($file in $files) {
+        "$num) $file"
+        $num++
+    }
+} else {
+    "No files were found.  The file list is empty."
 }
 "`n`n`n"
 
