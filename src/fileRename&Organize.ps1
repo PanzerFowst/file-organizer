@@ -40,6 +40,37 @@ $isAddingCountString = $true
 $isAddingDateStrings = $false
 
 
+#################################
+## Functions:                  ##
+#################################
+function RemoveAllEmptyFolders {
+
+    param (
+        [Parameter(Mandatory)]
+        [ValidateScript({
+            if (-Not ($_ | Test-Path)) {
+                throw "File or folder does not exist."
+            }
+            return $true
+        })]
+        [System.IO.FileInfo]$Basepath
+    )
+
+    do {
+        $fetchedDirList = Get-ChildItem $Basepath -Directory -Recurse
+        # (The -Force flag looks for hidden files and folders.)
+        $emptyDirectoryList = $fetchedDirList | Where-Object { (Get-ChildItem $_.fullName -Force).count -eq 0 }
+        $finalListToRemove = $emptyDirectoryList | Select-Object -ExpandProperty FullName
+        $finalListToRemove | ForEach-Object { Remove-Item $_ }
+    } while ($finalListToRemove.count -gt 0)
+}
+
+
+
+#################################
+## Main Script:                ##
+#################################
+
 # -Recurse looks into all subdirectories.  Leave the option out to only look at current
 # directory.  The results are piped into Where-Object which filters by file extension.
 $AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path "$basepath" |
@@ -239,13 +270,7 @@ foreach ($file in $files) {
 
 # Credit: https://www.delftstack.com/howto/powershell/powershell-delete-empty-folders/
 if ($isDeletingEmptyDirectories) {
-    do {
-        $fetchedDirList = Get-ChildItem $basepath -Directory -Recurse
-        # (The -Force flag looks for hidden files and folders.)
-        $emptyDirectoryList = $fetchedDirList | Where-Object { (Get-ChildItem $_.fullName -Force).count -eq 0 }
-        $finalListToRemove = $emptyDirectoryList | Select-Object -ExpandProperty FullName
-        $finalListToRemove | ForEach-Object { Remove-Item $_ }
-    } while ($finalListToRemove.count -gt 0)
+    RemoveAllEmptyFolders -Basepath $basepath
 }
 
 
