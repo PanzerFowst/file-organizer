@@ -17,11 +17,17 @@ class GUI:
         # Title of the window
         self.root.title("File Lister")
         # Window color, size, & cursor
-        self.root.configure(bg='#f3f0ea', width = 800, height = 200)
+        self.root.configure(bg='#f3f0ea', width = 800, height = 500)
         # Whether the window is x, y resizable (False)
         self.root.resizable(False, False)
 
         self.is_creating_output_dir = BooleanVar()
+        self.is_safe_mode = BooleanVar()
+        self.is_creating_new_directories = BooleanVar()
+        self.is_deleting_empty_directories = BooleanVar()
+        self.is_adding_count_str = BooleanVar()
+        self.is_adding_date_str = BooleanVar()
+        self.is_moving_files = BooleanVar()
 
         # Title for main window
         self.LabelMainWindow = Label(self.root,
@@ -30,7 +36,7 @@ class GUI:
                                 fg = '#3d4244',
                                 justify = LEFT,
                                 bg='#f3f0ea')
-        self.LabelMainWindow.place(relheight = 0.15, relx = 0.14, rely = 0.07)
+        self.LabelMainWindow.place(relheight = 0.15, relx = 0.10, rely = 0.00)
 
 
         # Label for the filepath row header
@@ -79,18 +85,60 @@ class GUI:
                                                             cursor="hand2")
         self.checkbutton_create_output_dir.place(relx = 0.7, rely = 0.52)
 
+        # Safe Mode Checkbox
+        self.checkbutton_safe_mode = Checkbutton(self.root, text = "Prints potential files to console without copying or moving the files",
+                                                            variable = self.is_safe_mode,
+                                                            cursor="hand2")
+        self.checkbutton_safe_mode.place(relx = 0.1, rely = 0.65)
+
+        # Create New Directories Checkbox
+        self.checkbutton_create_new_dir = Checkbutton(self.root, text = "Should the script create folders if they don't exist?",
+                                                            variable = self.is_creating_new_directories,
+                                                            cursor="hand2")
+        self.checkbutton_create_new_dir.place(relx = 0.1, rely = 0.70)
+
+        # Delete Empty Directories Checkbox
+        self.checkbutton_delete_empty_dir = Checkbutton(self.root, text = "Should the script delete folders if they are empty?",
+                                                            variable = self.is_deleting_empty_directories,
+                                                            cursor="hand2")
+        self.checkbutton_delete_empty_dir.place(relx = 0.1, rely = 0.75)
+
+        # Move/Copy Radio Buttons
+        self.radiobutton_move_files = Radiobutton(self.root, text = "Move Files",
+                                                            variable = self.is_moving_files,
+                                                            value=True,
+                                                            cursor="hand2")
+        self.radiobutton_move_files.place(relx = 0.1, rely = 0.80)
+        self.radiobutton_copy_files = Radiobutton(self.root, text = "Copy Files",
+                                                            variable = self.is_moving_files,
+                                                            value=False,
+                                                            cursor="hand2")
+        self.radiobutton_copy_files.place(relx = 0.1, rely = 0.85)
+
+        # Add Count Strings Checkbox
+        self.checkbutton_add_count_str = Checkbutton(self.root, text = "Should the script add count string?",
+                                                            variable = self.is_adding_count_str,
+                                                            cursor="hand2")
+        self.checkbutton_add_count_str.place(relx = 0.1, rely = 0.90)
+
+        # Add Date Strings Checkbox
+        self.checkbutton_add_date_str = Checkbutton(self.root, text = "Should the script add date string?",
+                                                            variable = self.is_adding_date_str,
+                                                            cursor="hand2")
+        self.checkbutton_add_date_str.place(relx = 0.1, rely = 0.95)
+
         # Cancel button
         self.button_cancel = ttk.Button(self.root,
                                             text = "Cancel",
                                             command = self.cancel_button_cb,
                                             cursor="hand2")
-        self.button_cancel.place(relx = 0.73, rely = 0.8)
+        self.button_cancel.place(relx = 0.78, rely = 0.92)
 
         # Add Run button
         self.button_run = ttk.Button(self.root,
                                         text = "Run",
                                         command = self.run_button_cb)
-        self.button_run.place(relx = 0.865, rely = 0.8)
+        self.button_run.place(relx = 0.89, rely = 0.92)
         self.button_run["state"] = DISABLED
 
         #####################
