@@ -2,7 +2,6 @@
 
 import tkinter as tk
 
-# from view.gui import GUI
 from controller.app_controller import Controller
 from model.app_model import Model
 from view.app_view import View
@@ -12,7 +11,12 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        self.title('Tkinter MVC Demo')
+        # Title of the window:
+        self.title("File Lister")
+        # Window background color, size, & cursor:
+        self.configure(bg='#f3f0ea', width=800, height=500)
+        # Whether the window is x, y resizable (False)
+        self.resizable(False, False)
 
         # create a model
         model = Model()
@@ -27,15 +31,7 @@ class App(tk.Tk):
 
 def main():
 
-    # Start GUI:
-    # gui = GUI()
-
-    #####################
-    # Uses display; responds to input until termination
-    #####################
-
-    # gui.root.mainloop()
-
+    # Start application:
     app = App()
     app.mainloop()
 

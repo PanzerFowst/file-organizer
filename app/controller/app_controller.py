@@ -9,24 +9,24 @@ class Controller:
         self.model: Model = model
         self.view: View = view
 
-        # Set save action of the view:
-        self.view.set_action_on_save(self.save)
+    #     # Set save action of the view:
+    #     self.view.set_action_on_save(self.save)
 
-    def save(self, email: str) -> None:
-        """
-        Save the email
-        :param email:
-        :return:
-        """
-        try:
+    # def save(self, email: str) -> None:
+    #     """
+    #     Save the email
+    #     :param email:
+    #     :return:
+    #     """
+    #     try:
 
-            # Save to the model:
-            self.model.email = email
-            self.model.save()
+    #         # Save to the model:
+    #         self.model.email = email
+    #         self.model.save()
 
-            # Show a success message:
-            self.view.show_success(f'The email {email} saved!')
+    #         # Show a success message:
+    #         self.view.show_success(f'The email {email} saved!')
 
-        except ValueError as error:
-            # Show an error message:
-            self.view.show_error(str(error))
+    #     except ValueError as error:
+    #         # Show an error message:
+    #         self.view.show_error(str(error))
