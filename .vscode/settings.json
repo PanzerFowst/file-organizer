@@ -1,10 +1,62 @@
 {
+    /*************************************************************************************
+    BEGIN .example SETTINGS
+    *************************************************************************************/
+    // Editor Settings:
+    "editor.formatOnSave": true,
+    "files.insertFinalNewline": true,
+    // Terminal Settings:
     "terminal.integrated.scrollback": 10000,
+    // Powershell Settings:
     "[powershell]": {
         "editor.formatOnSave": false,
     },
+    // Markdown Settings:
     "[markdown]": {
         "files.trimTrailingWhitespace": false,
         "editor.renderWhitespace": "trailing",
-    }
+    },
+    // Python Settings:
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.rulers": [
+            {
+                "column": 90,
+                "color": "#ffffff44"
+            },
+            {
+                "column": 120,
+                "color": "#ff000088"
+            },
+        ],
+    },
+    "python.analysis.typeCheckingMode": "basic",
+    "autopep8.args": [ // See argument list from: https://pypi.org/project/autopep8/
+        // Aggressiveness level:
+        "-a", // Each "-a" increases the level by 1...
+        "-a",
+        "-a",
+        "-a",
+        "-a",
+        // Max Line Length:
+        "--max-line-length",
+        "120",
+        // Select the set of rules to apply when formatting:
+        // "--select",
+        // "E27", // - Fix extraneous whitespace around keywords.
+        // "W605", // - Fix invalid escape sequence 'x'.
+        // Select a set of rules to ignore when formatting:
+        "--ignore",
+        "E266", // - Fix too many leading '#' for block comments.
+    ],
+    "autoDocstring.docstringFormat": "google",
+    "autoDocstring.startOnNewLine": true,
+    "autoDocstring.guessTypes": true,
+    // Theme settings:
+    "workbench.colorTheme": "PowerTech Dark",
+    /*************************************************************************************
+    END .example SETTINGS
+    *************************************************************************************/
 }

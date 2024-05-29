@@ -1,0 +1,42 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=827846 to learn about workspace recommendations.
+	// Extension identifier format: ${publisher}.${name}. Example: vscode.csharp
+	/*
+	To install these, go to Extensions, type "@recommended" into the search bar, and
+	select which extentions you'd like to install from the Workspace Recommendations.
+	All recommended extensions can also be installed by clicking the small cloud icon with
+	the down arrow to the right of the Workspace Recommendations tab.
+
+    Note: The following list of extensions will show up in the same order when typing in
+    "@recommended" into the Extensions Search Bar.
+
+    To enable the "Minimal Workspace Extensions" extensions only for the current
+    workspace, right-click each extension to enable only for the Workspace, and click
+    "Enable (Workspace)".  If the button is grayed out, first click "Disable", then click
+    the "Enable (Workspace)" button.
+	*/
+	// List of extensions which should be recommended for users of this workspace.
+	"recommendations": [
+		//--------------------------------------------------------------------------------
+		// Minimal Workspace Extensions:
+		//--------------------------------------------------------------------------------
+		// Python:
+		"ms-python.python",
+		"ms-python.vscode-pylance",
+		"ms-python.debugpy",
+		"donjayamanne.python-environment-manager",
+		"ms-python.autopep8",
+		"KevinRose.vsc-python-indent",
+		"njpwerner.autodocstring",
+		//--------------------------------------------------------------------------------
+		// Global Extension Recommendations:
+		//--------------------------------------------------------------------------------
+		"Gruntfuggly.todo-tree",
+		"vscode-icons-team.vscode-icons",
+		"VisualStudioExptTeam.vscodeintellicode",
+		"PowerTech.powerthemes",
+		"usernamehw.errorlens",
+	],
+	// List of extensions recommended by VS Code that should not be recommended for users of this workspace.
+	"unwantedRecommendations": []
+}
