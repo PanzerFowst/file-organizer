@@ -28,6 +28,8 @@
 		"ms-python.autopep8",
 		"KevinRose.vsc-python-indent",
 		"njpwerner.autodocstring",
+		// PowerShell:
+		"ms-vscode.powershell",
 		//--------------------------------------------------------------------------------
 		// Global Extension Recommendations:
 		//--------------------------------------------------------------------------------
