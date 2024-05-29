@@ -6,7 +6,7 @@ import os
 
 # from typing import Callable
 
-from tkinter.ttk import Frame, Button
+from tkinter.ttk import Frame, Button, Progressbar
 from tkinter import Tk, filedialog
 from tkinter import Label, Checkbutton, Radiobutton, BooleanVar
 import tkinter as tk
@@ -142,13 +142,13 @@ class View(Frame):
                                     text="Cancel",
                                     command=self.cancel_button_cb,
                                     cursor="hand2")
-        self.button_cancel.grid(row=4, column=3, padx=0, sticky=tk.E)
+        self.button_cancel.grid(row=4, column=3, padx=5, sticky=tk.E)
 
         # Add Run button
         self.button_run = Button(self,
                                  text="Run",
                                  command=self.run_button_cb)
-        self.button_run.grid(row=4, column=4, padx=0, sticky=tk.W)
+        self.button_run.grid(row=4, column=4, padx=5, sticky=tk.W)
         self.button_run["state"] = tk.DISABLED
         self.button_run["cursor"] = ""
 

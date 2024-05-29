@@ -6,7 +6,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}${pathSeparator}app${pathSeparator}main.py",
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}${pathSeparator}app${pathSeparator}",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}${pathSeparator}${env:PYTHONPATH}",
                 "PYTHONDONTWRITEBYTECODE": "1"
