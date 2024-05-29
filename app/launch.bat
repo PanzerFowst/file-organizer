@@ -1,3 +1,3 @@
 @echo off
-python %cd%\runPowershellGui.py
+python %cd%\main.py
 pause
