@@ -1,23 +1,18 @@
 # app/view/app_view.py
 
-import subprocess
-import sys
 import os
 
-# from typing import Callable
-
-from tkinter.ttk import Frame, Button, Progressbar
+from tkinter.ttk import Frame, Button
 from tkinter import Tk, filedialog
 from tkinter import Label, Checkbutton, Radiobutton, BooleanVar
 import tkinter as tk
 
+from view.page import Page
 
-class View(Frame):
+
+class GuiStartPage(Page):
     def __init__(self, parent):
         super().__init__(parent)
-        self.parent: Tk = parent
-        self.input_path: str = ""
-        self.output_path: str = ""
 
         # # set the save action callback
         # self.save_action: Callable[[str], None]
@@ -232,17 +227,5 @@ class View(Frame):
         # exit()
 
     def run_button_cb(self):
-        run_powershell_list_files(self.input_path)
         # Ends the tkinter window and continues the script; doesn't exit()
-        self.parent.destroy()
-
-
-def run_powershell_list_files(file_path):
-
-    powershell_script_path = os.path.abspath(".\\model\\listFiles.ps1")
-
-    p = subprocess.Popen(
-        f'powershell.exe -ExecutionPolicy RemoteSigned -file "{powershell_script_path}" -basepath "{file_path}"',
-        stdout=sys.stdout,
-    )
-    p.communicate()
+        self.next_page_cb()

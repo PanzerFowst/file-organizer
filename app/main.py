@@ -4,7 +4,8 @@ import tkinter as tk
 
 from controller.app_controller import Controller
 from model.app_model import Model
-from view.app_view import View
+from view.app_view import GuiStartPage
+from view.app_view_progress import GuiProgressPage
 
 
 class App(tk.Tk):
@@ -21,12 +22,8 @@ class App(tk.Tk):
         # create a model
         model = Model()
 
-        # create a view and place it on the root window
-        view = View(self)
-        view.grid(row=0, column=0, padx=10, pady=10)
-
         # create a controller
-        controller = Controller(model, view)
+        controller = Controller(self, model, [GuiStartPage(self), GuiProgressPage(self)])
 
 
 def main():
