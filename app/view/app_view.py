@@ -22,13 +22,7 @@ class MainWindow(ttk.Frame):
         self.output_path: str = ""
 
         # tkinter variables:
-        self.is_creating_output_dir = tk.BooleanVar()
-        self.is_safe_mode = tk.BooleanVar()
-        self.is_creating_new_directories = tk.BooleanVar()
-        self.is_deleting_empty_directories = tk.BooleanVar()
-        self.is_adding_count_str = tk.BooleanVar()
-        self.is_adding_date_str = tk.BooleanVar()
-        self.is_moving_files = tk.BooleanVar()
+        self.options_dict: dict[str, tk.Variable] = {}
 
         ##
         ### Create widgets:
@@ -183,6 +177,8 @@ class MainWindow(ttk.Frame):
         )
 
         # Output Path Create Output Directory Checkbox
+        self.is_creating_output_dir = tk.BooleanVar(name="is_creating_output_dir", value=False)
+        self.options_dict[str(self.is_creating_output_dir)] = self.is_creating_output_dir
         checkbutton_create_output_dir = ttk.Checkbutton(
             master=run_paths_frame_options, text="Create ./output/ Directory",
             variable=self.is_creating_output_dir,
@@ -236,6 +232,8 @@ class MainWindow(ttk.Frame):
         options_frame_buttons = ttk.Frame(master=options_frame)
 
         # Safe Mode Checkbox
+        self.is_safe_mode = tk.BooleanVar(name="is_safe_mode", value=False)
+        self.options_dict[str(self.is_safe_mode)] = self.is_safe_mode
         checkbutton_safe_mode = ttk.Checkbutton(
             master=options_frame_buttons,
             text="Prints potential files to console without copying or moving the files",
@@ -243,6 +241,8 @@ class MainWindow(ttk.Frame):
             cursor="hand2",
         )
         # Create New Directories Checkbox
+        self.is_creating_new_directories = tk.BooleanVar(name="is_creating_new_directories", value=False)
+        self.options_dict[str(self.is_creating_new_directories)] = self.is_creating_new_directories
         checkbutton_create_new_dir = ttk.Checkbutton(
             master=options_frame_buttons,
             text="Should the script create folders if they don't exist?",
@@ -250,6 +250,8 @@ class MainWindow(ttk.Frame):
             cursor="hand2",
         )
         # Delete Empty Directories Checkbox
+        self.is_deleting_empty_directories = tk.BooleanVar(name="is_deleting_empty_directories", value=False)
+        self.options_dict[str(self.is_deleting_empty_directories)] = self.is_deleting_empty_directories
         checkbutton_delete_empty_dir = ttk.Checkbutton(
             master=options_frame_buttons,
             text="Should the script delete folders if they are empty?",
@@ -257,6 +259,8 @@ class MainWindow(ttk.Frame):
             cursor="hand2",
         )
         # Move/Copy Radio Buttons
+        self.is_moving_files = tk.BooleanVar(name="is_moving_files", value=False)
+        self.options_dict[str(self.is_moving_files)] = self.is_moving_files
         moveCopyRadioFrame = ttk.Frame(master=options_frame_buttons)
         radiobutton_move_files = ttk.Radiobutton(
             master=moveCopyRadioFrame,
@@ -273,6 +277,8 @@ class MainWindow(ttk.Frame):
             cursor="hand2",
         )
         # Count Strings Checkbox
+        self.is_adding_count_str = tk.BooleanVar(name="is_adding_count_str", value=False)
+        self.options_dict[str(self.is_adding_count_str)] = self.is_adding_count_str
         checkbutton_add_count_str = ttk.Checkbutton(
             master=options_frame_buttons,
             text="Should the script add count string?",
@@ -280,6 +286,8 @@ class MainWindow(ttk.Frame):
             cursor="hand2",
         )
         # Date Strings Checkbox
+        self.is_adding_date_str = tk.BooleanVar(name="is_adding_date_str", value=False)
+        self.options_dict[str(self.is_adding_date_str)] = self.is_adding_date_str
         checkbutton_add_date_str = ttk.Checkbutton(
             master=options_frame_buttons,
             text="Should the script add date string?",
@@ -331,34 +339,36 @@ class MainWindow(ttk.Frame):
     #####################
 
     def get_input_path_cb(self):
-        # Open file dialog accepting only .pbix files; path will be the file_path var
+        # Open and return file path for input_path:
         self.input_path = filedialog.askdirectory(title="Select An Input Directory")
 
         if not path.exists(self.input_path):
             # Do nothing if the path is empty or not valid:
             return
 
-        # Hide button after push
-        self.button_input_browse.grid_remove()
-        # Update text label with file path
-        self.LabelSelectedInputPath.config(text=self.input_path, bg='#f3f0ea')
+        # Hide and forget button after push (user cannot bring this button back):
+        # TODO: Should this button always exist?
+        # self.button_input_browse.grid_forget()
+        # Update text label with file path:
+        self.LabelSelectedInputPath.configure(text=self.input_path, bg='#f3f0ea')
         # Call checkbox callback to update in case box is checked:
         self.check_button_create_output_dir_cb()
         # Update 'Run' button status:
         self.check_if_ready_to_run()
 
     def get_output_path_cb(self):
-        # Open and return file path as file_path var
+        # Open and return file path for output_path:
         self.output_path = filedialog.askdirectory(title="Select An Output Destination")
 
         if not path.exists(self.output_path):
             # Do nothing if the path is empty or not valid:
             return
 
-        # Hide button after push
-        self.button_output_browse.grid_remove()
+        # Hide but remember button after push (in case user unchecks box):
+        # TODO: Should this button always exist and only be removed by the checkbox?
+        # self.button_output_browse.grid_remove()
         # Update text label with file path
-        self.LabelSelectedOutputPath.config(text=self.output_path, bg='#f3f0ea')
+        self.LabelSelectedOutputPath.configure(text=self.output_path, bg='#f3f0ea')
         # Update 'Run' button status:
         self.check_if_ready_to_run()
 
@@ -373,13 +383,13 @@ class MainWindow(ttk.Frame):
                 self.output_path = temp
             else:
                 temp = "Select an input path."
-            self.LabelSelectedOutputPath.config(text=temp)
+            self.LabelSelectedOutputPath.configure(text=temp)
         else:
             # Show the output browse button when checkbox is not selected:
             self.button_output_browse.grid()
             # Clear output path:
             self.output_path = ""
-            self.LabelSelectedOutputPath.config(text="Select an output path.")
+            self.LabelSelectedOutputPath.configure(text="Select an output path.")
 
         # Update 'Run' button status:
         self.check_if_ready_to_run()
@@ -391,4 +401,6 @@ class MainWindow(ttk.Frame):
     def run_button_cb(self):
         # Ends the tkinter window and continues the script; doesn't exit()
         # self.next_page_cb()
-        pass
+        print("\n\n\r")
+        for name, var in self.options_dict.items():
+            print(f"{type(var)} {name}: {var.get()}")
