@@ -4,8 +4,7 @@ import tkinter as tk
 
 from controller.app_controller import Controller
 from model.app_model import Model
-from view.app_view import GuiStartPage
-from view.app_view_progress import GuiProgressPage
+from view.app_view import View
 
 
 class App(tk.Tk):
@@ -14,16 +13,21 @@ class App(tk.Tk):
 
         # Title of the window:
         self.title("File Lister")
-        # Window background color, size, & cursor:
+        # Window background color & size:
         self.configure(bg='#f3f0ea', width=800, height=500)
-        # Whether the window is x, y resizable (False)
+        # Whether the window is x, y resizable (False):
         self.resizable(False, False)
+        # Set the application to always remain on top:
+        self.wm_attributes("-topmost", True)
 
         # create a model
         model = Model()
 
+        # create a view
+        view = View(self)
+
         # create a controller
-        controller = Controller(self, model, [GuiStartPage(self), GuiProgressPage(self)])
+        controller = Controller(self, model, view)
 
 
 def main():

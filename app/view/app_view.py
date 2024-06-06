@@ -1,151 +1,315 @@
 # app/view/app_view.py
 
-import os
+from os import path
 
-from tkinter.ttk import Frame, Button
-from tkinter import Tk, filedialog
-from tkinter import Label, Checkbutton, Radiobutton, BooleanVar
+from tkinter import ttk, filedialog
 import tkinter as tk
 
-from view.page import Page
+
+class View():
+    def __init__(self, master: tk.Tk) -> None:
+        self.main_window = MainWindow(master)
 
 
-class GuiStartPage(Page):
-    def __init__(self, parent):
-        super().__init__(parent)
+class MainWindow(ttk.Frame):
+    def __init__(self, master: tk.Tk):
+        super().__init__(master)
+        self.place(relx=0, rely=0, relwidth=1, relheight=1)
 
-        # # set the save action callback
-        # self.save_action: Callable[[str], None]
+        # Class variables:
+        self.master: tk.Tk = master
+        self.input_path: str = ""
+        self.output_path: str = ""
 
-        self.is_creating_output_dir = BooleanVar()
-        self.is_safe_mode = BooleanVar()
-        self.is_creating_new_directories = BooleanVar()
-        self.is_deleting_empty_directories = BooleanVar()
-        self.is_adding_count_str = BooleanVar()
-        self.is_adding_date_str = BooleanVar()
-        self.is_moving_files = BooleanVar()
+        # tkinter variables:
+        self.is_creating_output_dir = tk.BooleanVar()
+        self.is_safe_mode = tk.BooleanVar()
+        self.is_creating_new_directories = tk.BooleanVar()
+        self.is_deleting_empty_directories = tk.BooleanVar()
+        self.is_adding_count_str = tk.BooleanVar()
+        self.is_adding_date_str = tk.BooleanVar()
+        self.is_moving_files = tk.BooleanVar()
+
+        ##
+        ### Create widgets:
+
+        title_frame = self.init_title_frame(master=self)
+        self.body_frame = self.init_body_frame(master=self)
+
+        ##
+        ### Place widgets:
+
+        title_frame.pack(fill=tk.X)
+        self.body_frame.pack(expand=True, fill=tk.BOTH)
+
+    ###########################
+    # Frame Creation Methods: #
+    ###########################
+
+    def init_title_frame(self, master) -> ttk.Frame:
+
+        ### Create widgets:
+
+        title_frame: ttk.Frame = ttk.Frame(master=master)
 
         # Title for main window
-        self.LabelMainWindow = Label(self,
-                                     text="File Lister",
-                                     font=("Segoe UI", 14, 'bold'),
-                                     fg='#3d4244',
-                                     justify=tk.LEFT,
-                                     bg='#f3f0ea')
-        self.LabelMainWindow.grid(row=0, column=0, pady=20)
+        title_frame_label = tk.Label(  # ttk.Label(
+            master=title_frame,
+            text="File Lister",
+            font=("Segoe UI", 20, 'bold'),
+            fg='#3d4244',
+            bg='#f3f0ea',
+        )
+
+        ##
+        ### Place widgets:
+
+        title_frame_label.pack(padx=15, pady=10, anchor=tk.W)
+
+        return title_frame
+
+    def init_body_frame(self, master) -> ttk.Frame:
+
+        ### Create widgets:
+
+        body_frame: ttk.Frame = ttk.Frame(master=master)
+
+        # Frame containing the buttons and labels to select the paths for the application:
+        run_paths_frame = self.init_run_paths_frame(master=body_frame)
+
+        # Frame containing the buttons to select different options of the application:
+        options_frame = self.init_options_frame(master=body_frame)
+
+        # Application actions frame:
+        actions_frame = ttk.Frame(master=body_frame)
+        actions_subframe = ttk.Frame(master=actions_frame)
+        # Cancel Button
+        self.button_cancel = ttk.Button(
+            master=actions_subframe,
+            text="Cancel",
+            command=self.cancel_button_cb,
+            cursor="hand2",
+        )
+        # Run Button
+        self.button_run = ttk.Button(
+            master=actions_subframe,
+            text="Run",
+            command=self.run_button_cb,
+            cursor="",
+            state=tk.DISABLED,
+        )
+
+        ##
+        ### Place widgets:
+
+        # Configure rows & columns:
+        body_frame.grid_columnconfigure(index=0, weight=1, uniform='a')
+        body_frame.grid_columnconfigure(index=1, weight=20, uniform='a')
+        body_frame.grid_rowconfigure(index=(0, 1, 2, 3), uniform='a')
+        body_frame.grid_rowconfigure(index=1, weight=2)
+        body_frame.grid_rowconfigure(index=3, weight=5)
+
+        # actions_frame:
+        self.button_cancel.pack(padx=7, side=tk.LEFT)
+        self.button_run.pack(padx=7, side=tk.LEFT)
+        actions_subframe.pack(padx=15, pady=15)
+        # Frames:
+        run_paths_frame.grid(row=1, column=1, sticky=tk.W)
+        options_frame.grid(row=3, column=1, sticky=tk.W)
+        actions_frame.place(relx=1, rely=1, anchor=tk.SE)
+
+        ttk.Style().configure('Custom.TFrame', background='blue')
+        body_frame.configure(style='Custom.TFrame')
+        return body_frame
+
+    def init_run_paths_frame(self, master) -> ttk.Frame:
+
+        ### Create widgets:
+
+        run_paths_frame = ttk.Frame(master=master)
+
+        ## Title for the run_paths_frame:
+        run_paths_frame_title = ttk.Frame(master=run_paths_frame)
+        run_paths_frame_title_label = tk.Label(  # ttk.Label(
+            master=run_paths_frame_title,
+            text="Script Run Paths:",
+            font=("Segoe UI", 12, 'underline'),
+            fg='#194D33',
+            bg='#ff00c8',
+        )
+
+        ## Options for the run_paths_frame:
+        run_paths_frame_options = ttk.Frame(master=run_paths_frame)
 
         # Label for the filepath row header
-        self.LabelInputPath = Label(self,
-                                    text="Input Path: ",
-                                    bg='#f3f0ea')
-        self.LabelInputPath.grid(row=1, column=0, sticky=tk.E)
+        LabelInputPath = tk.Label(  # ttk.Label(
+            master=run_paths_frame_options,
+            text="Input Path: ",
+            bg='#f3f0ea',
+        )
+        # Label for the output path row header
+        LabelOutputPath = tk.Label(  # ttk.Label(
+            master=run_paths_frame_options,
+            text="Output Path: ",
+            bg='#f3f0ea',
+        )
 
         # Label for the filepath text
-        self.LabelSelectedInputPath = Label(self,
-                                            text="Select the input path.",
-                                            bg='#f3f0ea')
-        self.LabelSelectedInputPath.grid(row=1, column=1, sticky=tk.W)
-
-        # Label for the output path row header
-        self.LabelOutputPath = Label(self,
-                                     text="Output Path: ",
-                                     bg='#f3f0ea')
-        self.LabelOutputPath.grid(row=2, column=0, sticky=tk.E)
-
+        self.LabelSelectedInputPath = tk.Label(  # ttk.Label(
+            master=run_paths_frame_options,
+            text="Select the input path.",
+            bg='#f3f0ea',
+        )
         # Label for the output path text
-        self.LabelSelectedOutputPath = Label(self,
-                                             text="Select an output path.",
-                                             bg='#f3f0ea')
-        self.LabelSelectedOutputPath.grid(row=2, column=1, sticky=tk.W)
+        self.LabelSelectedOutputPath = tk.Label(  # ttk.Label(
+            master=run_paths_frame_options,
+            text="Select an output path.",
+            bg='#f3f0ea',
+        )
 
         # Input File Browse button
-        self.button_input_browse = Button(self,
-                                          text="Browse...",
-                                          command=self.get_input_path_cb,
-                                          cursor="hand2")
-        self.button_input_browse.grid(row=1, column=2, sticky=tk.E)
-
+        self.button_input_browse = ttk.Button(
+            master=run_paths_frame_options,
+            text="Browse...",
+            command=self.get_input_path_cb,
+            cursor="hand2",
+        )
         # Output Path Browse button
-        self.button_output_browse = Button(self,
-                                           text="Browse...",
-                                           command=self.get_output_path_cb,
-                                           cursor="hand2")
-        self.button_output_browse.grid(row=2, column=2, sticky=tk.E)
+        self.button_output_browse = ttk.Button(
+            master=run_paths_frame_options,
+            text="Browse...",
+            command=self.get_output_path_cb,
+            cursor="hand2",
+        )
 
         # Output Path Create Output Directory Checkbox
-        self.checkbutton_create_output_dir = Checkbutton(self, text="Create ./output/ Directory",
-                                                         variable=self.is_creating_output_dir,
-                                                         command=self.check_button_create_output_dir_cb,
-                                                         cursor="hand2")
-        self.checkbutton_create_output_dir.grid(row=2, column=3, padx=20, sticky=tk.W)
+        checkbutton_create_output_dir = ttk.Checkbutton(
+            master=run_paths_frame_options, text="Create ./output/ Directory",
+            variable=self.is_creating_output_dir,
+            command=self.check_button_create_output_dir_cb,
+            cursor="hand2",
+        )
 
-        buttonOptionsFrame = Frame(self)
-        buttonOptionsFrame.grid(row=3, column=1, sticky=tk.W)
+        ##
+        ### Place widgets:
+
+        # Place in run_paths_frame_title placement:
+        run_paths_frame_title_label.pack(anchor=tk.W)
+
+        # Place in run_paths_frame_options grids:
+        run_paths_frame_options.grid_rowconfigure(index=(0, 1), weight=1, uniform='a')
+
+        LabelInputPath.grid(row=0, column=0, sticky=tk.E)
+        LabelOutputPath.grid(row=1, column=0, sticky=tk.E)
+
+        self.LabelSelectedInputPath.grid(row=0, column=1, sticky=tk.W)
+        self.LabelSelectedOutputPath.grid(row=1, column=1, sticky=tk.W)
+
+        self.button_input_browse.grid(row=0, column=2, sticky=tk.EW)
+        self.button_output_browse.grid(row=1, column=2, sticky=tk.EW)
+
+        checkbutton_create_output_dir.grid(row=1, column=3, padx=20, sticky=tk.W)
+
+        # Place subframes:
+        run_paths_frame_title.pack(fill=tk.X)
+        run_paths_frame_options.pack()
+
+        return run_paths_frame
+
+    def init_options_frame(self, master) -> ttk.Frame:
+
+        ### Create widgets:
+
+        options_frame = ttk.Frame(master=master)
+
+        ## Title for the options_frame:
+        options_frame_title = ttk.Frame(master=options_frame)
+        options_frame_title_label = tk.Label(  # ttk.Label(
+            master=options_frame_title,
+            text="Script Options:",
+            font=("Segoe UI", 12, 'underline'),
+            fg='#194D33',
+            bg='#ff00c8',
+        )
+
+        ## Button options for the options_frame:
+        options_frame_buttons = ttk.Frame(master=options_frame)
 
         # Safe Mode Checkbox
-        self.checkbutton_safe_mode = Checkbutton(
-            buttonOptionsFrame,
+        checkbutton_safe_mode = ttk.Checkbutton(
+            master=options_frame_buttons,
             text="Prints potential files to console without copying or moving the files",
             variable=self.is_safe_mode,
-            cursor="hand2")
-        self.checkbutton_safe_mode.grid(row=0, column=0, sticky=tk.W)
-
+            cursor="hand2",
+        )
         # Create New Directories Checkbox
-        self.checkbutton_create_new_dir = Checkbutton(
-            buttonOptionsFrame,
+        checkbutton_create_new_dir = ttk.Checkbutton(
+            master=options_frame_buttons,
             text="Should the script create folders if they don't exist?",
             variable=self.is_creating_new_directories,
-            cursor="hand2")
-        self.checkbutton_create_new_dir.grid(row=1, column=0, sticky=tk.W)
-
+            cursor="hand2",
+        )
         # Delete Empty Directories Checkbox
-        self.checkbutton_delete_empty_dir = Checkbutton(
-            buttonOptionsFrame,
+        checkbutton_delete_empty_dir = ttk.Checkbutton(
+            master=options_frame_buttons,
             text="Should the script delete folders if they are empty?",
             variable=self.is_deleting_empty_directories,
-            cursor="hand2")
-        self.checkbutton_delete_empty_dir.grid(row=2, column=0, sticky=tk.W)
-
+            cursor="hand2",
+        )
         # Move/Copy Radio Buttons
-        moveCopyRadioFrame = Frame(buttonOptionsFrame)
+        moveCopyRadioFrame = ttk.Frame(master=options_frame_buttons)
+        radiobutton_move_files = ttk.Radiobutton(
+            master=moveCopyRadioFrame,
+            text="Move Files",
+            variable=self.is_moving_files,
+            value=True,
+            cursor="hand2",
+        )
+        radiobutton_copy_files = ttk.Radiobutton(
+            master=moveCopyRadioFrame,
+            text="Copy Files",
+            variable=self.is_moving_files,
+            value=False,
+            cursor="hand2",
+        )
+        # Count Strings Checkbox
+        checkbutton_add_count_str = ttk.Checkbutton(
+            master=options_frame_buttons,
+            text="Should the script add count string?",
+            variable=self.is_adding_count_str,
+            cursor="hand2",
+        )
+        # Date Strings Checkbox
+        checkbutton_add_date_str = ttk.Checkbutton(
+            master=options_frame_buttons,
+            text="Should the script add date string?",
+            variable=self.is_adding_date_str,
+            cursor="hand2",
+        )
+
+        ##
+        ### Place widgets:
+
+        # Place in options_frame_title placement:
+        options_frame_title_label.pack(anchor=tk.W)
+
+        # Place in options_frame_buttons grids:
+        checkbutton_safe_mode.grid(row=0, column=0, sticky=tk.W)
+        checkbutton_create_new_dir.grid(row=1, column=0, sticky=tk.W)
+        checkbutton_delete_empty_dir.grid(row=2, column=0, sticky=tk.W)
+
+        radiobutton_move_files.pack(side=tk.LEFT)
+        radiobutton_copy_files.pack(side=tk.LEFT)
         moveCopyRadioFrame.grid(row=3, column=0, sticky=tk.W)
-        self.radiobutton_move_files = Radiobutton(moveCopyRadioFrame, text="Move Files",
-                                                  variable=self.is_moving_files,
-                                                  value=True,
-                                                  cursor="hand2")
-        self.radiobutton_move_files.grid(row=0, column=0, sticky=tk.E)
-        self.radiobutton_copy_files = Radiobutton(moveCopyRadioFrame, text="Copy Files",
-                                                  variable=self.is_moving_files,
-                                                  value=False,
-                                                  cursor="hand2")
-        self.radiobutton_copy_files.grid(row=0, column=1, sticky=tk.W)
 
-        # Add Count Strings Checkbox
-        self.checkbutton_add_count_str = Checkbutton(buttonOptionsFrame, text="Should the script add count string?",
-                                                     variable=self.is_adding_count_str,
-                                                     cursor="hand2")
-        self.checkbutton_add_count_str.grid(row=4, column=0, sticky=tk.W)
+        checkbutton_add_count_str.grid(row=4, column=0, sticky=tk.W)
+        checkbutton_add_date_str.grid(row=5, column=0, sticky=tk.W)
 
-        # Add Date Strings Checkbox
-        self.checkbutton_add_date_str = Checkbutton(buttonOptionsFrame, text="Should the script add date string?",
-                                                    variable=self.is_adding_date_str,
-                                                    cursor="hand2")
-        self.checkbutton_add_date_str.grid(row=5, column=0, sticky=tk.W)
+        # Place subframes:
+        options_frame_title.pack(fill=tk.X)
+        options_frame_buttons.pack()
 
-        # Cancel button
-        self.button_cancel = Button(self,
-                                    text="Cancel",
-                                    command=self.cancel_button_cb,
-                                    cursor="hand2")
-        self.button_cancel.grid(row=4, column=3, padx=5, sticky=tk.E)
-
-        # Add Run button
-        self.button_run = Button(self,
-                                 text="Run",
-                                 command=self.run_button_cb)
-        self.button_run.grid(row=4, column=4, padx=5, sticky=tk.W)
-        self.button_run["state"] = tk.DISABLED
-        self.button_run["cursor"] = ""
+        return options_frame
 
     # def set_action_on_save(self, action_on_save: Callable[[str], None]) -> None:
     #     """
@@ -157,22 +321,20 @@ class GuiStartPage(Page):
 
     def check_if_ready_to_run(self):
         # Update 'Run' button state once the file dialog is done:
-        if os.path.exists(self.input_path) and (os.path.exists(self.output_path) or self.is_creating_output_dir.get()):
-            self.button_run["state"] = tk.NORMAL
-            self.button_run["cursor"] = "hand2"
+        if path.exists(self.input_path) and (path.exists(self.output_path) or self.is_creating_output_dir.get()):
+            self.button_run.configure(state=tk.NORMAL, cursor="hand2")
         else:
-            self.button_run["state"] = tk.DISABLED
-            self.button_run["cursor"] = ""
+            self.button_run.configure(state=tk.DISABLED, cursor="")
 
     #####################
-    # Button Callbacks:
+    # Button Callbacks: #
     #####################
 
     def get_input_path_cb(self):
         # Open file dialog accepting only .pbix files; path will be the file_path var
         self.input_path = filedialog.askdirectory(title="Select An Input Directory")
 
-        if not os.path.exists(self.input_path):
+        if not path.exists(self.input_path):
             # Do nothing if the path is empty or not valid:
             return
 
@@ -189,7 +351,7 @@ class GuiStartPage(Page):
         # Open and return file path as file_path var
         self.output_path = filedialog.askdirectory(title="Select An Output Destination")
 
-        if not os.path.exists(self.output_path):
+        if not path.exists(self.output_path):
             # Do nothing if the path is empty or not valid:
             return
 
@@ -206,7 +368,7 @@ class GuiStartPage(Page):
             # Hide the output browse button when checkbox is selected:
             self.button_output_browse.grid_remove()
             # Catch if user selects the checkbox before selecting the input path:
-            if os.path.exists(self.input_path):
+            if path.exists(self.input_path):
                 temp = self.input_path + f'/output'
                 self.output_path = temp
             else:
@@ -223,9 +385,10 @@ class GuiStartPage(Page):
         self.check_if_ready_to_run()
 
     def cancel_button_cb(self):
-        self.parent.destroy()
+        self.master.destroy()
         # exit()
 
     def run_button_cb(self):
         # Ends the tkinter window and continues the script; doesn't exit()
-        self.next_page_cb()
+        # self.next_page_cb()
+        pass
