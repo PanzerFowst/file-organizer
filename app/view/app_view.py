@@ -1,18 +1,54 @@
 # app/view/app_view.py
 
 from os import path
+from typing import Protocol
 
-from tkinter import ttk, filedialog
+from tkinter import ttk, filedialog, scrolledtext
 import tkinter as tk
 
 
-class View():
-    def __init__(self, master: tk.Tk) -> None:
-        self.main_window = MainWindow(master)
+class Controller(Protocol):
+    def handle_started_execution(self, input_path: str, output_path: str, options_dict: dict[str, tk.Variable]) -> None:
+        ...
+
+
+class View(tk.Tk):
+    def __init__(self):
+        super().__init__()
+
+        # Title of the window:
+        self.title("File Lister")
+        # Window background color & size:
+        self.configure(bg='#f3f0ea')
+        # Place window:
+        width = 800  # self.winfo_width()
+        height = 500  # self.winfo_height()
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        x = (screen_width - width) // 2 + 500
+        y = (screen_height - height) // 2 + 250
+        self.geometry(f"{width}x{height}+{x}+{y}")
+        # Whether the window is x, y resizable (False):
+        self.resizable(False, False)
+        # Set the application to always remain on top:
+        self.wm_attributes("-topmost", True)
+
+    def init_ui(self, controller: Controller) -> None:
+
+        self.main_window = MainWindow(self, controller)
+
+    def write_to_progress_display(self, text: str) -> None:
+        self.main_window.progress_display_text.insert(tk.END, text)
+        self.main_window.progress_display_text.see(tk.END)
+
+    def handle_finished_execution(self) -> None:
+        self.main_window.button_run.configure(state=tk.DISABLED)
+        # self.main_window.progress_display_text.configure(state=tk.DISABLED)
+        self.main_window.progressbar.stop()
 
 
 class MainWindow(ttk.Frame):
-    def __init__(self, master: tk.Tk):
+    def __init__(self, master: tk.Tk, controller: Controller):
         super().__init__(master)
         self.place(relx=0, rely=0, relwidth=1, relheight=1)
 
@@ -23,6 +59,9 @@ class MainWindow(ttk.Frame):
 
         # tkinter variables:
         self.options_dict: dict[str, tk.Variable] = {}
+
+        # TODO: Is this the best way to save reference?
+        self.controller: Controller = controller
 
         ##
         ### Create widgets:
@@ -179,7 +218,7 @@ class MainWindow(ttk.Frame):
         # Output Path Create Output Directory Checkbox
         self.is_creating_output_dir = tk.BooleanVar(name="is_creating_output_dir", value=False)
         self.options_dict[str(self.is_creating_output_dir)] = self.is_creating_output_dir
-        checkbutton_create_output_dir = ttk.Checkbutton(
+        self.checkbutton_create_output_dir = ttk.Checkbutton(
             master=run_paths_frame_options, text="Create ./output/ Directory",
             variable=self.is_creating_output_dir,
             command=self.check_button_create_output_dir_cb,
@@ -204,7 +243,7 @@ class MainWindow(ttk.Frame):
         self.button_input_browse.grid(row=0, column=2, sticky=tk.EW)
         self.button_output_browse.grid(row=1, column=2, sticky=tk.EW)
 
-        checkbutton_create_output_dir.grid(row=1, column=3, padx=20, sticky=tk.W)
+        self.checkbutton_create_output_dir.grid(row=1, column=3, padx=20, sticky=tk.W)
 
         # Place subframes:
         run_paths_frame_title.pack(fill=tk.X)
@@ -234,7 +273,7 @@ class MainWindow(ttk.Frame):
         # Safe Mode Checkbox
         self.is_safe_mode = tk.BooleanVar(name="is_safe_mode", value=False)
         self.options_dict[str(self.is_safe_mode)] = self.is_safe_mode
-        checkbutton_safe_mode = ttk.Checkbutton(
+        self.checkbutton_safe_mode = ttk.Checkbutton(
             master=options_frame_buttons,
             text="Prints potential files to console without copying or moving the files",
             variable=self.is_safe_mode,
@@ -243,7 +282,7 @@ class MainWindow(ttk.Frame):
         # Create New Directories Checkbox
         self.is_creating_new_directories = tk.BooleanVar(name="is_creating_new_directories", value=False)
         self.options_dict[str(self.is_creating_new_directories)] = self.is_creating_new_directories
-        checkbutton_create_new_dir = ttk.Checkbutton(
+        self.checkbutton_create_new_dir = ttk.Checkbutton(
             master=options_frame_buttons,
             text="Should the script create folders if they don't exist?",
             variable=self.is_creating_new_directories,
@@ -252,7 +291,7 @@ class MainWindow(ttk.Frame):
         # Delete Empty Directories Checkbox
         self.is_deleting_empty_directories = tk.BooleanVar(name="is_deleting_empty_directories", value=False)
         self.options_dict[str(self.is_deleting_empty_directories)] = self.is_deleting_empty_directories
-        checkbutton_delete_empty_dir = ttk.Checkbutton(
+        self.checkbutton_delete_empty_dir = ttk.Checkbutton(
             master=options_frame_buttons,
             text="Should the script delete folders if they are empty?",
             variable=self.is_deleting_empty_directories,
@@ -262,14 +301,14 @@ class MainWindow(ttk.Frame):
         self.is_moving_files = tk.BooleanVar(name="is_moving_files", value=False)
         self.options_dict[str(self.is_moving_files)] = self.is_moving_files
         moveCopyRadioFrame = ttk.Frame(master=options_frame_buttons)
-        radiobutton_move_files = ttk.Radiobutton(
+        self.radiobutton_move_files = ttk.Radiobutton(
             master=moveCopyRadioFrame,
             text="Move Files",
             variable=self.is_moving_files,
             value=True,
             cursor="hand2",
         )
-        radiobutton_copy_files = ttk.Radiobutton(
+        self.radiobutton_copy_files = ttk.Radiobutton(
             master=moveCopyRadioFrame,
             text="Copy Files",
             variable=self.is_moving_files,
@@ -279,7 +318,7 @@ class MainWindow(ttk.Frame):
         # Count Strings Checkbox
         self.is_adding_count_str = tk.BooleanVar(name="is_adding_count_str", value=False)
         self.options_dict[str(self.is_adding_count_str)] = self.is_adding_count_str
-        checkbutton_add_count_str = ttk.Checkbutton(
+        self.checkbutton_add_count_str = ttk.Checkbutton(
             master=options_frame_buttons,
             text="Should the script add count string?",
             variable=self.is_adding_count_str,
@@ -288,7 +327,7 @@ class MainWindow(ttk.Frame):
         # Date Strings Checkbox
         self.is_adding_date_str = tk.BooleanVar(name="is_adding_date_str", value=False)
         self.options_dict[str(self.is_adding_date_str)] = self.is_adding_date_str
-        checkbutton_add_date_str = ttk.Checkbutton(
+        self.checkbutton_add_date_str = ttk.Checkbutton(
             master=options_frame_buttons,
             text="Should the script add date string?",
             variable=self.is_adding_date_str,
@@ -302,22 +341,103 @@ class MainWindow(ttk.Frame):
         options_frame_title_label.pack(anchor=tk.W)
 
         # Place in options_frame_buttons grids:
-        checkbutton_safe_mode.grid(row=0, column=0, sticky=tk.W)
-        checkbutton_create_new_dir.grid(row=1, column=0, sticky=tk.W)
-        checkbutton_delete_empty_dir.grid(row=2, column=0, sticky=tk.W)
+        self.checkbutton_safe_mode.grid(row=0, column=0, sticky=tk.W)
+        self.checkbutton_create_new_dir.grid(row=1, column=0, sticky=tk.W)
+        self.checkbutton_delete_empty_dir.grid(row=2, column=0, sticky=tk.W)
 
-        radiobutton_move_files.pack(side=tk.LEFT)
-        radiobutton_copy_files.pack(side=tk.LEFT)
+        self.radiobutton_move_files.pack(side=tk.LEFT)
+        self.radiobutton_copy_files.pack(side=tk.LEFT)
         moveCopyRadioFrame.grid(row=3, column=0, sticky=tk.W)
 
-        checkbutton_add_count_str.grid(row=4, column=0, sticky=tk.W)
-        checkbutton_add_date_str.grid(row=5, column=0, sticky=tk.W)
+        self.checkbutton_add_count_str.grid(row=4, column=0, sticky=tk.W)
+        self.checkbutton_add_date_str.grid(row=5, column=0, sticky=tk.W)
 
         # Place subframes:
         options_frame_title.pack(fill=tk.X)
         options_frame_buttons.pack()
 
         return options_frame
+
+    def init_progress_frame(self, master) -> ttk.Frame:
+
+        ### Create widgets:
+
+        progress_frame = ttk.Frame(master=master)
+
+        ## Title for the progress_frame:
+        progress_frame_title = ttk.Frame(master=progress_frame)
+        progress_frame_title_label = tk.Label(  # ttk.Label(
+            master=progress_frame_title,
+            text="Progress:",
+            font=("Segoe UI", 12, 'underline'),
+            fg='#194D33',
+            bg='#ff00c8',
+        )
+
+        ## Button options for the options_frame:
+        progress_frame_status = ttk.Frame(master=progress_frame)
+
+        # Add progressbar
+        self.progressbar = ttk.Progressbar(
+            progress_frame_status,
+            orient='horizontal',
+            mode='indeterminate',
+            # length=500,
+        )
+        self.progressbar.start(3)
+
+        # TODO: Add a text box or something to print data received from the model...
+        self.progress_display_text = scrolledtext.ScrolledText(
+            master=progress_frame_status,
+            wrap='word',
+            width=65,  # in characters
+            height=5,  # in lines
+            bg='#f3f0ea',
+        )
+        self.progress_display_text.insert(tk.END, "Progress and output will be displayed here.\n\n")
+
+        ##
+        ### Place widgets:
+
+        # Place in options_frame_title placement:
+        progress_frame_title_label.pack(anchor=tk.W)
+
+        self.progressbar.grid(row=0, column=0, padx=10, pady=20, sticky=tk.W)
+        self.progress_display_text.grid(row=1, column=0)
+
+        # Place subframes:
+        progress_frame_title.pack(fill=tk.X)
+        progress_frame_status.pack()
+
+        return progress_frame
+
+    ############################
+    # Frame Adjusting Methods: #
+    ############################
+
+    def adjust_to_execution_view(self) -> None:
+
+        # Delete run path buttons:
+        self.button_input_browse.destroy()
+        self.button_output_browse.destroy()
+        self.checkbutton_create_output_dir.destroy()
+        del self.button_input_browse
+        del self.button_output_browse
+        del self.checkbutton_create_output_dir
+
+        # Disable script option buttons:
+        self.checkbutton_safe_mode.configure(state=tk.DISABLED, cursor="")
+        self.checkbutton_create_new_dir.configure(state=tk.DISABLED, cursor="")
+        self.checkbutton_delete_empty_dir.configure(state=tk.DISABLED, cursor="")
+        self.radiobutton_move_files.configure(state=tk.DISABLED, cursor="")
+        self.radiobutton_copy_files.configure(state=tk.DISABLED, cursor="")
+        self.checkbutton_add_count_str.configure(state=tk.DISABLED, cursor="")
+        self.checkbutton_add_date_str.configure(state=tk.DISABLED, cursor="")
+
+        # Create and initialize progress frame inside of the body frame:
+        progress_frame = self.init_progress_frame(self.body_frame)
+        progress_frame.grid(row=4, column=1, sticky=tk.W)
+        # TODO: Add padding instead of using different rows...
 
     # def set_action_on_save(self, action_on_save: Callable[[str], None]) -> None:
     #     """
@@ -329,7 +449,10 @@ class MainWindow(ttk.Frame):
 
     def check_if_ready_to_run(self):
         # Update 'Run' button state once the file dialog is done:
-        if path.exists(self.input_path) and (path.exists(self.output_path) or self.is_creating_output_dir.get()):
+        # TODO: Remove this True override later...
+        if True or (
+            path.exists(self.input_path) and (path.exists(self.output_path) or self.is_creating_output_dir.get())
+        ):
             self.button_run.configure(state=tk.NORMAL, cursor="hand2")
         else:
             self.button_run.configure(state=tk.DISABLED, cursor="")
@@ -404,3 +527,9 @@ class MainWindow(ttk.Frame):
         print("\n\n\r")
         for name, var in self.options_dict.items():
             print(f"{type(var)} {name}: {var.get()}")
+
+        self.adjust_to_execution_view()
+
+        # Call the controller with the selected options:
+        self.controller.handle_started_execution(self.input_path, self.output_path, self.options_dict)
+        # TODO: Convert to list of Boolean values before passing to controller...

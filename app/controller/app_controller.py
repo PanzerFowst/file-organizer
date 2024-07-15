@@ -1,77 +1,56 @@
 # app/controller/app_controller.py
 
+from __future__ import annotations
+from typing import Protocol
+
 import tkinter as tk
+# TODO: Get rid of any references to Tkinter...
 
 from model.app_model import Model
-from view.app_view import View
+
+
+class View(Protocol):
+
+    def init_ui(self, controller: Controller) -> None:
+        ...
+
+    def handle_finished_execution(self) -> None:
+        ...
+
+    def write_to_progress_display(self, text: str) -> None:
+        ...
+
+    def mainloop(self) -> None:
+        ...
 
 
 class Controller:
-    def __init__(self, parent: tk.Tk, model: Model, view: View):
-        self.parent: tk.Tk = parent
+    def __init__(self, model: Model, view: View):
         self.model: Model = model
         self.view: View = view
 
-    #     self.current_frame: Frame
-    #     self.current_page: PossiblePages
+    def run(self) -> None:
+        self.model.init_model(self)
+        self.view.init_ui(self)
+        # TODO: Any other initialization here...?
+        self.view.mainloop()
 
-    #     self.views: dict[str, Page] = {}
-    #     for view in views:
-    #         page_name = view.__class__.__name__
-    #         self.views[page_name] = view
-    #         # Set callback function to get to next frame:
-    #         view.set_next_page_cb(self.advance_frame)
-    #         # Set each frame on top of each other:
-    #         view.grid(row=0, column=0, sticky=tk.NSEW)
+    def handle_started_execution(self, input_path: str, output_path: str, options_dict: dict[str, tk.Variable]) -> None:
 
-    #     self.current_page = PossiblePages.NONE
-    #     self.advance_frame()
+        # Set printing callback:
+        self.model.set_output_callback(self.view.write_to_progress_display)
 
-    # def show_frame(self, page: PossiblePages):
-    #     '''Show a frame for the given page name'''
-    #     self.current_page = page
-    #     self.current_frame = self.views[page.value]
-    #     self.current_frame.tkraise()
+        # Set the paths and start the powershell script:
+        try:
+            self.model.input_path = input_path
+            self.model.output_path = output_path
 
-    # def advance_frame(self):
-    #     '''Show a frame for the given page name'''
-    #     if self.current_page == PossiblePages.NONE:
-    #         self.show_frame(PossiblePages.START)
-    #     elif self.current_page == PossiblePages.START:
-    #         start_page = self.views[PossiblePages.START.value]
-    #         assert isinstance(start_page, GuiStartPage), f"Expected GuiStartPage, got {type(start_page).__name__}"
-    #         progress_page = self.views[PossiblePages.PROGROSS.value]
-    #         assert isinstance(
-    #             progress_page, GuiProgressPage), f"Expected GuiProgressPage, got {
-    #             type(progress_page).__name__}"
-    #         progress_page.input_path = start_page.input_path
-    #         progress_page.output_path = start_page.output_path
-    #         progress_page.update_labels()
-    #         self.model.input_path = progress_page.input_path
-    #         self.model.output_path = progress_page.output_path
-    #         self.show_frame(PossiblePages.PROGROSS)
-    #         self.model.run_powershell_list_files()
-    #     else:
-    #         self.parent.destroy()
+            self.model.run_powershell_list_files()
 
-    #     # Set save action of the view:
-    #     self.view.set_action_on_save(self.save)
+        except ValueError as e:
+            self.view.write_to_progress_display(f"Error setting input/output paths:\n\t{e}")
+            self.view.write_to_progress_display(f"\n\nRestart the application and try again...")
+            # TODO: Handle error better...?
 
-    # def save(self, email: str) -> None:
-    #     """
-    #     Save the email
-    #     :param email:
-    #     :return:
-    #     """
-    #     try:
-
-    #         # Save to the model:
-    #         self.model.email = email
-    #         self.model.save()
-
-    #         # Show a success message:
-    #         self.view.show_success(f'The email {email} saved!')
-
-    #     except ValueError as error:
-    #         # Show an error message:
-    #         self.view.show_error(str(error))
+    def handle_finished_execution(self) -> None:
+        self.view.handle_finished_execution()
