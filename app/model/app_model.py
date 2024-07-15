@@ -44,8 +44,6 @@ class Model:
 
     def run_powershell_list_files(self):
 
-        # self.output_callback = lambda line: print(line + '\n')
-
         run_path = os.path.abspath(self.ps_script_path)
 
         def powershell_thread():
@@ -66,9 +64,8 @@ class Model:
                 process.stderr.close()
             process.wait()
 
+            # Once execution is done, notify the controller:
+            self.controller.handle_finished_execution()
+
         thread = threading.Thread(target=powershell_thread)
         thread.start()
-
-        # Once execution is done, notify the controller:
-        thread.join()  # BUG: this appears to block the GUI thread...
-        self.controller.handle_finished_execution()
