@@ -36,6 +36,72 @@ class Model:
     def output_path(self, path: str) -> None:
         self.__output_path = path
 
+    @property
+    def is_safe_mode(self) -> str:
+        return self.__is_safe_mode
+
+    @is_safe_mode.setter
+    def is_safe_mode(self, flag: bool) -> None:
+        if flag:
+            self.__is_safe_mode = "$true"
+        else:
+            self.__is_safe_mode = "$false"
+
+    @property
+    def is_creating_new_directories(self) -> str:
+        return self.__is_creating_new_directories
+
+    @is_creating_new_directories.setter
+    def is_creating_new_directories(self, flag: bool) -> None:
+        if flag:
+            self.__is_creating_new_directories = "$true"
+        else:
+            self.__is_creating_new_directories = "$false"
+
+    @property
+    def is_deleting_empty_directories(self) -> str:
+        return self.__is_deleting_empty_directories
+
+    @is_deleting_empty_directories.setter
+    def is_deleting_empty_directories(self, flag: bool) -> None:
+        if flag:
+            self.__is_deleting_empty_directories = "$true"
+        else:
+            self.__is_deleting_empty_directories = "$false"
+
+    @property
+    def is_moving_files(self) -> str:
+        return self.__is_moving_files
+
+    @is_moving_files.setter
+    def is_moving_files(self, flag: bool) -> None:
+        if flag:
+            self.__is_moving_files = "$true"
+        else:
+            self.__is_moving_files = "$false"
+
+    @property
+    def is_adding_count_str(self) -> str:
+        return self.__is_adding_count_str
+
+    @is_adding_count_str.setter
+    def is_adding_count_str(self, flag: bool) -> None:
+        if flag:
+            self.__is_adding_count_str = "$true"
+        else:
+            self.__is_adding_count_str = "$false"
+
+    @property
+    def is_adding_date_str(self) -> str:
+        return self.__is_adding_date_str
+
+    @is_adding_date_str.setter
+    def is_adding_date_str(self, flag: bool) -> None:
+        if flag:
+            self.__is_adding_date_str = "$true"
+        else:
+            self.__is_adding_date_str = "$false"
+
     def init_model(self, controller: Controller) -> None:
         self.controller: Controller = controller
 
@@ -47,12 +113,21 @@ class Model:
         run_path = os.path.abspath(self.ps_script_path)
 
         def powershell_thread():
-            process = subprocess.Popen(
-                f'powershell.exe -ExecutionPolicy RemoteSigned -file "{run_path}" -basepath "{self.input_path}"',
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
+
+            command: list[str] = [
+                "powershell.exe",
+                "-ExecutionPolicy", "RemoteSigned",
+                "-File", run_path,
+                "-input_path", self.input_path,
+                "-output_path", self.output_path,
+                "-is_safe_mode", self.is_safe_mode,
+                "-is_creating_new_directories", self.is_creating_new_directories,
+                "-is_deleting_empty_directories", self.is_deleting_empty_directories,
+                "-is_moving_files", self.is_moving_files,
+                "-is_adding_count_str", self.is_adding_count_str,
+                "-is_adding_date_str", self.is_adding_date_str,
+            ]
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             if process.stdout is not None:
                 if self.output_callback is not None:

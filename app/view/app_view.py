@@ -618,11 +618,6 @@ class MainWindow(ttk.Frame):
 
     def run_button_cb(self):
         # Ends the tkinter window and continues the script; doesn't exit()
-        # self.next_page_cb()
-        print("\n\n\r")
-        for name, var in self.options_dict.items():
-            print(f"{type(var)} {name}: {var.get()}")
-        print("\n\n\r")
 
         self.adjust_to_execution_view()
 

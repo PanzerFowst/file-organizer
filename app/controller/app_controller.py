@@ -34,15 +34,20 @@ class Controller:
 
     def handle_started_execution(self, input_path: str, output_path: str, options_dict: dict[str, bool]) -> None:
 
-        print(f"Simplified options dictionary: {options_dict}")
-
         # Set printing callback:
         self.model.set_output_callback(self.view.write_to_progress_display)
 
         # Set the paths and start the powershell script:
         try:
+            # Set Model options:
             self.model.input_path = input_path
             self.model.output_path = output_path
+            self.model.is_safe_mode = options_dict["is_safe_mode"]
+            self.model.is_creating_new_directories = options_dict["is_creating_new_directories"]
+            self.model.is_deleting_empty_directories = options_dict["is_deleting_empty_directories"]
+            self.model.is_moving_files = options_dict["is_moving_files"]
+            self.model.is_adding_count_str = options_dict["is_adding_count_str"]
+            self.model.is_adding_date_str = options_dict["is_adding_date_str"]
 
             self.model.run_powershell_list_files()
 
