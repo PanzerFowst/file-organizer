@@ -26,7 +26,7 @@ $isReadOnly = $false
 
 # Directory Creation (Should the script create folders if they don't exist?):
 $isCreatingDirectories = $true
-# Empty Directory Deletion (Should the script delete folders if they are empty?):
+# Empty Directory Deletion (Should the script delete folders if they are empty from the basepath (input) path?):
 $isDeletingEmptyDirectories = $true
 # Copy or Move file:
 #   If true, script moves and modifies the original file.
@@ -37,6 +37,7 @@ $isTouchingOriginalFiles = $false
 #   Example: file@000.txt, file@001.txt, file@002.txt, fileCOOL@000.txt
 $isAddingCountString = $true
 # Add datestrings to end of file (Should the script add a datestring to the file name?):
+# TODO: Add examples here... 
 $isAddingDateStrings = $false
 
 

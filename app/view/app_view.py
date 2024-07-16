@@ -38,12 +38,14 @@ class View(tk.Tk):
         self.main_window = MainWindow(self, controller)
 
     def write_to_progress_display(self, text: str) -> None:
+        # Update the progress display text widget:
         self.main_window.progress_display_text.insert(tk.END, text)
         self.main_window.progress_display_text.see(tk.END)
+        # Update the progress bar:
+        self.main_window.progressbar.step()
 
     def handle_finished_execution(self) -> None:
-        self.main_window.button_run.configure(state=tk.DISABLED)
-        # self.main_window.progress_display_text.configure(state=tk.DISABLED)
+        self.main_window.button_run.configure(text="OK", command=lambda: ...)
         self.main_window.progressbar.stop()
 
 
@@ -137,18 +139,15 @@ class MainWindow(ttk.Frame):
 
         # Configure rows & columns:
         body_frame.grid_columnconfigure(index=0, weight=1, uniform='a')
-        body_frame.grid_columnconfigure(index=1, weight=20, uniform='a')
-        body_frame.grid_rowconfigure(index=(0, 1, 2, 3), uniform='a')
-        body_frame.grid_rowconfigure(index=1, weight=2)
-        body_frame.grid_rowconfigure(index=3, weight=5)
+        body_frame.grid_columnconfigure(index=1, weight=25, uniform='a')
 
         # actions_frame:
         self.button_cancel.pack(padx=7, side=tk.LEFT)
         self.button_run.pack(padx=7, side=tk.LEFT)
         actions_subframe.pack(padx=15, pady=15)
         # Frames:
-        run_paths_frame.grid(row=1, column=1, sticky=tk.W)
-        options_frame.grid(row=3, column=1, sticky=tk.W)
+        run_paths_frame.grid(row=0, column=1, pady=(5, 10), sticky=tk.W)
+        options_frame.grid(row=1, column=1, pady=(0, 10), sticky=tk.W)
         actions_frame.place(relx=1, rely=1, anchor=tk.SE)
 
         ttk.Style().configure('Custom.TFrame', background='blue')
@@ -273,11 +272,19 @@ class MainWindow(ttk.Frame):
         # Safe Mode Checkbox
         self.is_safe_mode = tk.BooleanVar(name="is_safe_mode", value=False)
         self.options_dict[str(self.is_safe_mode)] = self.is_safe_mode
+        style = ttk.Style()     # Configure a unique style with bold text
+        style.configure("CustomBold.TCheckbutton", font=("TkDefaultFont", 10, "bold"))
         self.checkbutton_safe_mode = ttk.Checkbutton(
             master=options_frame_buttons,
-            text="Prints potential files to console without copying or moving the files",
+            text="Safe Mode",
+            style="CustomBold.TCheckbutton",
             variable=self.is_safe_mode,
             cursor="hand2",
+            command=self.update_options_cb,
+        )
+        self.is_safe_mode_label = tk.Label(  # ttk.Label(
+            master=options_frame_buttons,
+            text="...",
         )
         # Create New Directories Checkbox
         self.is_creating_new_directories = tk.BooleanVar(name="is_creating_new_directories", value=False)
@@ -287,6 +294,12 @@ class MainWindow(ttk.Frame):
             text="Should the script create folders if they don't exist?",
             variable=self.is_creating_new_directories,
             cursor="hand2",
+            command=self.update_options_cb,
+        )
+        self.is_creating_new_directories_label = tk.Label(  # ttk.Label(
+            master=options_frame_buttons,
+            text="...",
+            justify="left",
         )
         # Delete Empty Directories Checkbox
         self.is_deleting_empty_directories = tk.BooleanVar(name="is_deleting_empty_directories", value=False)
@@ -296,6 +309,11 @@ class MainWindow(ttk.Frame):
             text="Should the script delete folders if they are empty?",
             variable=self.is_deleting_empty_directories,
             cursor="hand2",
+            command=self.update_options_cb,
+        )
+        self.is_deleting_empty_directories_label = tk.Label(  # ttk.Label(
+            master=options_frame_buttons,
+            text="...",
         )
         # Move/Copy Radio Buttons
         self.is_moving_files = tk.BooleanVar(name="is_moving_files", value=False)
@@ -307,6 +325,7 @@ class MainWindow(ttk.Frame):
             variable=self.is_moving_files,
             value=True,
             cursor="hand2",
+            command=self.update_options_cb,
         )
         self.radiobutton_copy_files = ttk.Radiobutton(
             master=moveCopyRadioFrame,
@@ -314,6 +333,11 @@ class MainWindow(ttk.Frame):
             variable=self.is_moving_files,
             value=False,
             cursor="hand2",
+            command=self.update_options_cb,
+        )
+        self.is_moving_files_label = tk.Label(  # ttk.Label(
+            master=options_frame_buttons,
+            text="...",
         )
         # Count Strings Checkbox
         self.is_adding_count_str = tk.BooleanVar(name="is_adding_count_str", value=False)
@@ -323,6 +347,12 @@ class MainWindow(ttk.Frame):
             text="Should the script add count string?",
             variable=self.is_adding_count_str,
             cursor="hand2",
+            command=self.update_options_cb,
+        )
+        self.is_adding_count_str_label = tk.Label(  # ttk.Label(
+            master=options_frame_buttons,
+            text="...",
+            justify="left",
         )
         # Date Strings Checkbox
         self.is_adding_date_str = tk.BooleanVar(name="is_adding_date_str", value=False)
@@ -332,7 +362,16 @@ class MainWindow(ttk.Frame):
             text="Should the script add date string?",
             variable=self.is_adding_date_str,
             cursor="hand2",
+            command=self.update_options_cb,
         )
+        self.is_adding_date_str_label = tk.Label(  # ttk.Label(
+            master=options_frame_buttons,
+            text="...",
+            justify="left",
+        )
+
+        # Update the options explanation labels:
+        self.update_options_cb()
 
         ##
         ### Place widgets:
@@ -342,15 +381,21 @@ class MainWindow(ttk.Frame):
 
         # Place in options_frame_buttons grids:
         self.checkbutton_safe_mode.grid(row=0, column=0, sticky=tk.W)
-        self.checkbutton_create_new_dir.grid(row=1, column=0, sticky=tk.W)
+        self.is_safe_mode_label.grid(row=0, column=1, sticky=tk.W, padx=(10, 0))
+        self.checkbutton_create_new_dir.grid(row=1, column=0, sticky=tk.NW)
+        self.is_creating_new_directories_label.grid(row=1, column=1, sticky=tk.W, padx=(10, 0))
         self.checkbutton_delete_empty_dir.grid(row=2, column=0, sticky=tk.W)
+        self.is_deleting_empty_directories_label.grid(row=2, column=1, sticky=tk.W, padx=(10, 0))
 
         self.radiobutton_move_files.pack(side=tk.LEFT)
         self.radiobutton_copy_files.pack(side=tk.LEFT)
         moveCopyRadioFrame.grid(row=3, column=0, sticky=tk.W)
+        self.is_moving_files_label.grid(row=3, column=1, sticky=tk.W, padx=(10, 0))
 
-        self.checkbutton_add_count_str.grid(row=4, column=0, sticky=tk.W)
-        self.checkbutton_add_date_str.grid(row=5, column=0, sticky=tk.W)
+        self.checkbutton_add_count_str.grid(row=4, column=0, sticky=tk.NW)
+        self.is_adding_count_str_label.grid(row=4, column=1, sticky=tk.W, padx=(10, 0))
+        self.checkbutton_add_date_str.grid(row=5, column=0, sticky=tk.NW)
+        self.is_adding_date_str_label.grid(row=5, column=1, sticky=tk.W, padx=(10, 0))
 
         # Place subframes:
         options_frame_title.pack(fill=tk.X)
@@ -415,6 +460,67 @@ class MainWindow(ttk.Frame):
     # Frame Adjusting Methods: #
     ############################
 
+    def update_options_cb(self) -> None:
+
+        # Safe mode explanation:
+        if self.is_safe_mode.get():
+            self.is_safe_mode_label.configure(
+                text="App will not move or copy any files but still prints their new locations."
+            )
+        else:
+            self.is_safe_mode_label.configure(
+                text="App will %s files to new locations." % ("move" if self.is_moving_files.get() else "copy")
+            )
+        # TODO: Remove the move/copy radio buttons in the future.
+
+        # Creating new directories explanation:
+        if self.is_creating_new_directories.get():
+            self.is_creating_new_directories_label.configure(
+                text="App will create a new folder if folder does not already exist."
+            )
+        else:
+            self.is_creating_new_directories_label.configure(
+                text="App will not create new folders.  This may cause problems if the destination folder\n" +
+                "does not exist."
+            )
+
+        # Deleting empty directories explanation:
+        if self.is_deleting_empty_directories.get():
+            self.is_deleting_empty_directories_label.configure(
+                text="App will delete empty folders/directories in the input path."
+            )
+        else:
+            self.is_deleting_empty_directories_label.configure(
+                text="App will not delete empty folders/directories in the input path."
+            )
+
+        # Moving / Copying files explanation:
+        if self.is_moving_files.get():
+            # TODO: Check for other side effects...
+            self.is_moving_files_label.configure(text="App will move and modify ORIGINAL files to new directories.")
+        else:
+            self.is_moving_files_label.configure(
+                text="App will NOT touch ORIGINAL files.  Instead, they will be copied to their new locations."
+            )
+
+        # Count strings explanation:
+        if self.is_adding_count_str.get():
+            self.is_adding_count_str_label.configure(
+                text="App will add \"@000\" to the end in cases of same file names and dates.\n" +
+                "Example: file@000.txt, file@001.txt, file@002.txt, other_file@000.txt, another_file@000.txt"
+            )
+        else:
+            self.is_adding_count_str_label.configure(text="App will not add count strings.")
+
+        # Date strings explanation:
+        if self.is_adding_date_str.get():
+            self.is_adding_date_str_label.configure(
+                text="App will add the date to the end of the file name.\n" +
+                "Example: FILL IN EXAMPLES HERE..."
+            )
+        else:
+            self.is_adding_date_str_label.configure(text="App will not add date strings.")
+
     def adjust_to_execution_view(self) -> None:
 
         # Delete run path buttons:
@@ -436,23 +542,11 @@ class MainWindow(ttk.Frame):
 
         # Create and initialize progress frame inside of the body frame:
         progress_frame = self.init_progress_frame(self.body_frame)
-        progress_frame.grid(row=4, column=1, sticky=tk.W)
-        # TODO: Add padding instead of using different rows...
-
-    # def set_action_on_save(self, action_on_save: Callable[[str], None]) -> None:
-    #     """
-    #     Set the controller
-    #     :param controller:
-    #     :return:
-    #     """
-    #     self.save_action = action_on_save
+        progress_frame.grid(row=2, column=1, sticky=tk.W)
 
     def check_if_ready_to_run(self):
         # Update 'Run' button state once the file dialog is done:
-        # TODO: Remove this True override later...
-        if True or (
-            path.exists(self.input_path) and (path.exists(self.output_path) or self.is_creating_output_dir.get())
-        ):
+        if path.exists(self.input_path) and (path.exists(self.output_path) or self.is_creating_output_dir.get()):
             self.button_run.configure(state=tk.NORMAL, cursor="hand2")
         else:
             self.button_run.configure(state=tk.DISABLED, cursor="")
@@ -519,6 +613,7 @@ class MainWindow(ttk.Frame):
 
     def cancel_button_cb(self):
         self.master.destroy()
+        # TODO: Figure out how to shutdown the subprocess if it's running...
         # exit()
 
     def run_button_cb(self):
