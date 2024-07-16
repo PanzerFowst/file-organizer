@@ -8,7 +8,7 @@ import tkinter as tk
 
 
 class Controller(Protocol):
-    def handle_started_execution(self, input_path: str, output_path: str, options_dict: dict[str, tk.Variable]) -> None:
+    def handle_started_execution(self, input_path: str, output_path: str, options_dict: dict[str, bool]) -> None:
         ...
 
 
@@ -622,9 +622,22 @@ class MainWindow(ttk.Frame):
         print("\n\n\r")
         for name, var in self.options_dict.items():
             print(f"{type(var)} {name}: {var.get()}")
+        print("\n\n\r")
 
         self.adjust_to_execution_view()
 
         # Call the controller with the selected options:
-        self.controller.handle_started_execution(self.input_path, self.output_path, self.options_dict)
-        # TODO: Convert to list of Boolean values before passing to controller...
+        self.controller.handle_started_execution(self.input_path, self.output_path, self.convert_options_to_dict())
+
+    ###################
+    # Helper Methods: #
+    ###################
+
+    def convert_options_to_dict(self) -> dict[str, bool]:
+
+        # Create a new dictionary out of base variable types using the options dictionary:
+        simplified_options_dict: dict[str, bool] = {
+            name: var.get() for name, var in self.options_dict.items()
+        }
+
+        return simplified_options_dict

@@ -3,9 +3,6 @@
 from __future__ import annotations
 from typing import Protocol
 
-import tkinter as tk
-# TODO: Get rid of any references to Tkinter...
-
 from model.app_model import Model
 
 
@@ -35,7 +32,9 @@ class Controller:
         # TODO: Any other initialization here...?
         self.view.mainloop()
 
-    def handle_started_execution(self, input_path: str, output_path: str, options_dict: dict[str, tk.Variable]) -> None:
+    def handle_started_execution(self, input_path: str, output_path: str, options_dict: dict[str, bool]) -> None:
+
+        print(f"Simplified options dictionary: {options_dict}")
 
         # Set printing callback:
         self.model.set_output_callback(self.view.write_to_progress_display)
