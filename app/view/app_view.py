@@ -22,18 +22,18 @@ class View(tk.Tk):
         self.configure(bg='#f3f0ea')
         # Place window:
         width = 800  # self.winfo_width()
-        height = 500  # self.winfo_height()
+        height = 800  # self.winfo_height()
         screen_width = self.winfo_screenwidth()
         screen_height = self.winfo_screenheight()
         x = (screen_width - width) // 2 + 500
-        y = (screen_height - height) // 2 + 250
+        y = (screen_height - height) // 2
         self.geometry(f"{width}x{height}+{x}+{y}")
         # Whether the window is x, y resizable (False):
         self.resizable(False, False)
         # Set the application to always remain on top:
         self.wm_attributes("-topmost", True)
 
-    def init_ui(self, controller: Controller) -> None:
+    def init_view(self, controller: Controller) -> None:
 
         self.main_window = MainWindow(self, controller)
 
@@ -45,7 +45,7 @@ class View(tk.Tk):
         self.main_window.progressbar.step()
 
     def handle_finished_execution(self) -> None:
-        self.main_window.button_run.configure(text="OK", command=lambda: ...)
+        # self.main_window.button_run.configure(text="OK", command=lambda: ...)
         self.main_window.progressbar.stop()
 
 
@@ -80,6 +80,8 @@ class MainWindow(ttk.Frame):
     ###########################
     # Frame Creation Methods: #
     ###########################
+
+    # TODO: Add a label with the version number and other info about the application...SD
 
     def init_title_frame(self, master) -> ttk.Frame:
 
@@ -270,7 +272,7 @@ class MainWindow(ttk.Frame):
         options_frame_buttons = ttk.Frame(master=options_frame)
 
         # Safe Mode Checkbox
-        self.is_safe_mode = tk.BooleanVar(name="is_safe_mode", value=False)
+        self.is_safe_mode = tk.BooleanVar(name="is_safe_mode", value=True)
         self.options_dict[str(self.is_safe_mode)] = self.is_safe_mode
         style = ttk.Style()     # Configure a unique style with bold text
         style.configure("CustomBold.TCheckbutton", font=("TkDefaultFont", 10, "bold"))
@@ -340,7 +342,7 @@ class MainWindow(ttk.Frame):
             text="...",
         )
         # Count Strings Checkbox
-        self.is_adding_count_str = tk.BooleanVar(name="is_adding_count_str", value=False)
+        self.is_adding_count_str = tk.BooleanVar(name="is_adding_count_str", value=True)
         self.options_dict[str(self.is_adding_count_str)] = self.is_adding_count_str
         self.checkbutton_add_count_str = ttk.Checkbutton(
             master=options_frame_buttons,
@@ -435,11 +437,35 @@ class MainWindow(ttk.Frame):
         self.progress_display_text = scrolledtext.ScrolledText(
             master=progress_frame_status,
             wrap='word',
-            width=65,  # in characters
-            height=5,  # in lines
+            width=90,  # in characters
+            height=20,  # in lines
             bg='#f3f0ea',
         )
         self.progress_display_text.insert(tk.END, "Progress and output will be displayed here.\n\n")
+
+        def on_keypress(event: tk.Event):
+            # List of keys to allow:
+            allowed_keys = {
+                "Left",
+                "Right",
+                "Up",
+                "Down",
+                "Shift_L",
+                "Shift_R",
+                "Control_L",
+                "Control_R",
+                "Alt_L",
+                "Alt_R",
+            }
+
+            if (event.keysym == "c" or event.keysym == "C") and (int(event.state) & (1 << 2)):
+                return  # Allow Ctrl + C for copying
+            elif event.keysym in allowed_keys:
+                return  # Allow other allowed keys
+            else:
+                # Ignore all other keypress events
+                return "break"
+        self.progress_display_text.bind("<KeyPress>", on_keypress)
 
         ##
         ### Place widgets:
@@ -511,6 +537,10 @@ class MainWindow(ttk.Frame):
             )
         else:
             self.is_adding_count_str_label.configure(text="App will not add count strings.")
+            # TODO: Add a warning that files with the same name and date will be
+            # overwritten by each other and that it is recommended to use count strings
+            # first and then to verify there are no duplicates and run the program again
+            # with this option disabled.
 
         # Date strings explanation:
         if self.is_adding_date_str.get():
@@ -524,25 +554,29 @@ class MainWindow(ttk.Frame):
     def adjust_to_execution_view(self) -> None:
 
         # Delete run path buttons:
-        self.button_input_browse.destroy()
-        self.button_output_browse.destroy()
-        self.checkbutton_create_output_dir.destroy()
-        del self.button_input_browse
-        del self.button_output_browse
-        del self.checkbutton_create_output_dir
+        if hasattr(self, 'button_input_browse'):
+            self.button_input_browse.destroy()
+            del self.button_input_browse
+        if hasattr(self, 'button_output_browse'):
+            self.button_output_browse.destroy()
+            del self.button_output_browse
+        if hasattr(self, 'checkbutton_create_output_dir'):
+            self.checkbutton_create_output_dir.destroy()
+            del self.checkbutton_create_output_dir
 
         # Disable script option buttons:
-        self.checkbutton_safe_mode.configure(state=tk.DISABLED, cursor="")
-        self.checkbutton_create_new_dir.configure(state=tk.DISABLED, cursor="")
-        self.checkbutton_delete_empty_dir.configure(state=tk.DISABLED, cursor="")
-        self.radiobutton_move_files.configure(state=tk.DISABLED, cursor="")
-        self.radiobutton_copy_files.configure(state=tk.DISABLED, cursor="")
-        self.checkbutton_add_count_str.configure(state=tk.DISABLED, cursor="")
-        self.checkbutton_add_date_str.configure(state=tk.DISABLED, cursor="")
+        # self.checkbutton_safe_mode.configure(state=tk.DISABLED, cursor="")
+        # self.checkbutton_create_new_dir.configure(state=tk.DISABLED, cursor="")
+        # self.checkbutton_delete_empty_dir.configure(state=tk.DISABLED, cursor="")
+        # self.radiobutton_move_files.configure(state=tk.DISABLED, cursor="")
+        # self.radiobutton_copy_files.configure(state=tk.DISABLED, cursor="")
+        # self.checkbutton_add_count_str.configure(state=tk.DISABLED, cursor="")
+        # self.checkbutton_add_date_str.configure(state=tk.DISABLED, cursor="")
 
         # Create and initialize progress frame inside of the body frame:
-        progress_frame = self.init_progress_frame(self.body_frame)
-        progress_frame.grid(row=2, column=1, sticky=tk.W)
+        if not hasattr(self, 'progress_frame'):
+            self.progress_frame = self.init_progress_frame(self.body_frame)
+            self.progress_frame.grid(row=2, column=1, sticky=tk.W)
 
     def check_if_ready_to_run(self):
         # Update 'Run' button state once the file dialog is done:

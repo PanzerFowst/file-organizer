@@ -8,6 +8,37 @@
 ### @created: 2023/05/30.                     ###
 #################################################
 
+param(
+    [ValidateNotNullOrEmpty()]
+    [ValidateScript({
+        if (-Not ($_ | Test-Path)) {
+            throw "File or folder ($_) does not exist."
+        }
+        return $true
+    })]
+    [System.IO.DirectoryInfo]$input_path,
+    [string]$output_path,
+    [string]$recursive = "true", # TODO: Add this option later...
+    [string]$is_safe_mode = "true", # default value if not assigned
+    [string]$is_creating_new_directories = "false",   # TODO: Remove this option later...
+    [string]$is_deleting_empty_directories = "false",
+    [string]$is_moving_files = "false",
+    [string]$is_adding_count_str = "true",
+    [string]$is_adding_date_str = "false",
+    $envname
+)
+
+Write-Host "PowerShell Process ID (PID): $PID`n`n"
+
+
+# Convert string boolean values to actual Booleans
+[bool]$recursive = [System.Convert]::ToBoolean($recursive)
+[bool]$is_safe_mode = [System.Convert]::ToBoolean($is_safe_mode)
+[bool]$is_creating_new_directories = [System.Convert]::ToBoolean($is_creating_new_directories)
+[bool]$is_deleting_empty_directories = [System.Convert]::ToBoolean($is_deleting_empty_directories)
+[bool]$is_moving_files = [System.Convert]::ToBoolean($is_moving_files)
+[bool]$is_adding_count_str = [System.Convert]::ToBoolean($is_adding_count_str)
+[bool]$is_adding_date_str = [System.Convert]::ToBoolean($is_adding_date_str)
 
 
 #################################
@@ -18,27 +49,41 @@
 #################################
 
 # Basepath / directory (set this to make the "home directory out of which everything is created."):
-$basepath = "D:\Pictures"
-$destinationpath = "D:\Pictures-Output"
+try {
+    [System.IO.DirectoryInfo]$basepath = Convert-Path $input_path
+    # [string]$output_path = Convert-Path $output_path
+    if ($is_creating_new_directories -and !(Test-Path $output_path)) {
+        "Output path doesn't exist!  Creating output path..."
+        New-Item -ItemType Directory -Path "$output_path"
+    }
+    if (-not (Test-Path $output_path)) {
+        throw "Output path does not exist...  Please either create it or allow the App to create it by selecting the checkbox."
+    }
+    [System.IO.DirectoryInfo]$destinationpath = Convert-Path $output_path
+} catch {
+    Write-Host "Exception occurred: $_"
+    Write-Host "Exiting..."
+    exit 1
+}
 
 # Read Only (If true, just prints potential files to console without copying or moving the files):
-$isReadOnly = $false
+$isReadOnly = $is_safe_mode
 
 # Directory Creation (Should the script create folders if they don't exist?):
-$isCreatingDirectories = $true
+$isCreatingDirectories = $is_creating_new_directories
 # Empty Directory Deletion (Should the script delete folders if they are empty from the basepath (input) path?):
-$isDeletingEmptyDirectories = $true
+$isDeletingEmptyDirectories = $is_deleting_empty_directories
 # Copy or Move file:
 #   If true, script moves and modifies the original file.
 #   If false, script copies files without modifying old file.
-$isTouchingOriginalFiles = $false
+$isTouchingOriginalFiles = $is_moving_files
 # Add count string to file end:
 #   Should the script add "@000" to the end in cases of same file names?
 #   Example: file@000.txt, file@001.txt, file@002.txt, fileCOOL@000.txt
-$isAddingCountString = $true
+$isAddingCountString = $is_adding_count_str
 # Add datestrings to end of file (Should the script add a datestring to the file name?):
-# TODO: Add examples here... 
-$isAddingDateStrings = $false
+# TODO: Add examples here...
+$isAddingDateStrings = $is_adding_date_str
 
 
 #################################
@@ -74,8 +119,9 @@ function RemoveAllEmptyFolders {
 
 # -Recurse looks into all subdirectories.  Leave the option out to only look at current
 # directory.  The results are piped into Where-Object which filters by file extension.
-$AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path "$basepath" |
-Where-Object { $_.Extension -match "(jpg|jpeg|png|raw|mp4|mov|heic|aae)" }
+$AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path "$basepath" # |
+# Where-Object { $_.Extension -match "(jpg|jpeg|png|raw|mp4|mov|heic|aae)" }
+# TODO: Add an option to include more file extension types...
 # Filter down to only File Objects:
 $files = $AllChildren | Where-Object { !$_.PSisContainer }
 $num = 1
@@ -231,8 +277,12 @@ foreach ($file in $files) {
 
     # Display the new path and name:
     "Item #$num`:"
-    "New path: $newPath"
-    "New filename: $newName"
+    "`tNew path: $newPath"
+    "`tNew filename: $newName"
+
+
+    # TODO: Split this script into two parts: One where it creates a metafile of where
+    #   everything will go and prints it--the other where it actually moves everything.
 
 
     ######################################################################################
@@ -268,9 +318,6 @@ foreach ($file in $files) {
         # (Get-Item "$newPath$newName").CreationTime=$CreationDate #("18 February 2023 02:08:23")
         # (Get-Item "$newPath$newName").LastWriteTime=("16 January 2022 11:00:00")
     }
-
-    # Extra space between loop iterations:
-    "`n"
 }
 
 # Credit: https://www.delftstack.com/howto/powershell/powershell-delete-empty-folders/

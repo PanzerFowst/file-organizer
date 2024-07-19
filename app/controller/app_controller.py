@@ -8,7 +8,7 @@ from model.app_model import Model
 
 class View(Protocol):
 
-    def init_ui(self, controller: Controller) -> None:
+    def init_view(self, controller: Controller) -> None:
         ...
 
     def handle_finished_execution(self) -> None:
@@ -28,7 +28,7 @@ class Controller:
 
     def run(self) -> None:
         self.model.init_model(self)
-        self.view.init_ui(self)
+        self.view.init_view(self)
         # TODO: Any other initialization here...?
         self.view.mainloop()
 

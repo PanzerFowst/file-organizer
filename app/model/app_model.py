@@ -13,7 +13,16 @@ class Controller(Protocol):
 
 class Model:
     def __init__(self):
-        self.ps_script_path: str = ".\\model\\listFiles.ps1"
+        # self.ps_script_path: str = ".\\model\\listFiles.ps1"
+        self.ps_script_path: str = "..\\src\\fileRename&Organize.ps1"
+
+        self.is_safe_mode: bool = True
+        self.is_creating_new_directories: bool = False
+        self.is_deleting_empty_directories: bool = False
+        self.is_moving_files: bool = False
+        self.is_adding_count_str: bool = True
+        self.is_adding_date_str: bool = False
+
         self.output_callback: Callable[[str], None] | None = None
 
     @property
@@ -24,7 +33,7 @@ class Model:
     def input_path(self, path: str) -> None:
 
         if os.path.exists(path):
-            self.__input_path = path
+            self.__input_path = os.path.abspath(path)
         else:
             raise ValueError(f'Invalid file path: {path}')
 
@@ -34,73 +43,7 @@ class Model:
 
     @output_path.setter
     def output_path(self, path: str) -> None:
-        self.__output_path = path
-
-    @property
-    def is_safe_mode(self) -> str:
-        return self.__is_safe_mode
-
-    @is_safe_mode.setter
-    def is_safe_mode(self, flag: bool) -> None:
-        if flag:
-            self.__is_safe_mode = "$true"
-        else:
-            self.__is_safe_mode = "$false"
-
-    @property
-    def is_creating_new_directories(self) -> str:
-        return self.__is_creating_new_directories
-
-    @is_creating_new_directories.setter
-    def is_creating_new_directories(self, flag: bool) -> None:
-        if flag:
-            self.__is_creating_new_directories = "$true"
-        else:
-            self.__is_creating_new_directories = "$false"
-
-    @property
-    def is_deleting_empty_directories(self) -> str:
-        return self.__is_deleting_empty_directories
-
-    @is_deleting_empty_directories.setter
-    def is_deleting_empty_directories(self, flag: bool) -> None:
-        if flag:
-            self.__is_deleting_empty_directories = "$true"
-        else:
-            self.__is_deleting_empty_directories = "$false"
-
-    @property
-    def is_moving_files(self) -> str:
-        return self.__is_moving_files
-
-    @is_moving_files.setter
-    def is_moving_files(self, flag: bool) -> None:
-        if flag:
-            self.__is_moving_files = "$true"
-        else:
-            self.__is_moving_files = "$false"
-
-    @property
-    def is_adding_count_str(self) -> str:
-        return self.__is_adding_count_str
-
-    @is_adding_count_str.setter
-    def is_adding_count_str(self, flag: bool) -> None:
-        if flag:
-            self.__is_adding_count_str = "$true"
-        else:
-            self.__is_adding_count_str = "$false"
-
-    @property
-    def is_adding_date_str(self) -> str:
-        return self.__is_adding_date_str
-
-    @is_adding_date_str.setter
-    def is_adding_date_str(self, flag: bool) -> None:
-        if flag:
-            self.__is_adding_date_str = "$true"
-        else:
-            self.__is_adding_date_str = "$false"
+        self.__output_path = os.path.abspath(path)
 
     def init_model(self, controller: Controller) -> None:
         self.controller: Controller = controller
@@ -110,6 +53,9 @@ class Model:
 
     def run_powershell_list_files(self):
 
+        def bool_to_ps_string(value: bool) -> str:
+            return "true" if value is True else "false"
+
         run_path = os.path.abspath(self.ps_script_path)
 
         def powershell_thread():
@@ -118,16 +64,16 @@ class Model:
                 "powershell.exe",
                 "-ExecutionPolicy", "RemoteSigned",
                 "-File", run_path,
-                "-input_path", self.input_path,
-                "-output_path", self.output_path,
-                "-is_safe_mode", self.is_safe_mode,
-                "-is_creating_new_directories", self.is_creating_new_directories,
-                "-is_deleting_empty_directories", self.is_deleting_empty_directories,
-                "-is_moving_files", self.is_moving_files,
-                "-is_adding_count_str", self.is_adding_count_str,
-                "-is_adding_date_str", self.is_adding_date_str,
+                "-input_path:", self.input_path,
+                "-output_path:", self.output_path,
+                "-is_safe_mode:", bool_to_ps_string(self.is_safe_mode),
+                "-is_creating_new_directories:", bool_to_ps_string(self.is_creating_new_directories),
+                "-is_deleting_empty_directories:", bool_to_ps_string(self.is_deleting_empty_directories),
+                "-is_moving_files:", bool_to_ps_string(self.is_moving_files),
+                "-is_adding_count_str:", bool_to_ps_string(self.is_adding_count_str),
+                "-is_adding_date_str:", bool_to_ps_string(self.is_adding_date_str),
             ]
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            process = subprocess.Popen(args=command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             if process.stdout is not None:
                 if self.output_callback is not None:
