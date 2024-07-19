@@ -13,8 +13,12 @@ class Controller(Protocol):
 
 
 class View(tk.Tk):
-    def __init__(self):
+    def __init__(self, versionMajorMinor: tuple[int, int, int]):
         super().__init__()
+
+        self.VERSION: int = versionMajorMinor[0]
+        self.MAJOR: int = versionMajorMinor[1]
+        self.MINOR: int = versionMajorMinor[2]
 
         # Title of the window:
         self.title("File Lister")
@@ -37,6 +41,18 @@ class View(tk.Tk):
 
         self.main_window = MainWindow(self, controller)
 
+        # Application version frame label:
+        version_frame = ttk.Frame(master=self.main_window)
+        version_label = tk.Label(  # ttk.Label(
+            master=version_frame,
+            text=f"v{self.VERSION}.{self.MAJOR}.{self.MINOR}",
+            font=("Segoe UI", 8),
+        )
+
+        # version_frame:
+        version_label.pack(padx=(5, 0), side=tk.LEFT)
+        version_frame.place(relx=0, rely=1, anchor=tk.SW)
+
     def write_to_progress_display(self, text: str) -> None:
         # Update the progress display text widget:
         self.main_window.progress_display_text.insert(tk.END, text)
@@ -50,8 +66,9 @@ class View(tk.Tk):
 
 
 class MainWindow(ttk.Frame):
-    def __init__(self, master: tk.Tk, controller: Controller):
+    def __init__(self, master: tk.Tk, controller: Controller) -> None:
         super().__init__(master)
+
         self.place(relx=0, rely=0, relwidth=1, relheight=1)
 
         # Class variables:
@@ -80,8 +97,6 @@ class MainWindow(ttk.Frame):
     ###########################
     # Frame Creation Methods: #
     ###########################
-
-    # TODO: Add a label with the version number and other info about the application...SD
 
     def init_title_frame(self, master) -> ttk.Frame:
 
