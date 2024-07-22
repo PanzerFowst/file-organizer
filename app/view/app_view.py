@@ -332,7 +332,7 @@ class MainWindow(ttk.Frame):
         self.options_dict[str(self.is_recursive_search)] = self.is_recursive_search
         self.checkbutton_recursive_search_dir = ttk.Checkbutton(
             master=options_frame_buttons,
-            text="Should the script search folder and subfolders?",
+            text="Recursive Directory Search",
             variable=self.is_recursive_search,
             cursor="hand2",
             command=self.update_options_cb,
@@ -347,7 +347,7 @@ class MainWindow(ttk.Frame):
         self.options_dict[str(self.is_deleting_empty_directories)] = self.is_deleting_empty_directories
         self.checkbutton_delete_empty_dir = ttk.Checkbutton(
             master=options_frame_buttons,
-            text="Should the script delete folders if they are empty?",
+            text="Delete Empty Folders",
             variable=self.is_deleting_empty_directories,
             cursor="hand2",
             command=self.update_options_cb,
@@ -361,7 +361,7 @@ class MainWindow(ttk.Frame):
         self.options_dict[str(self.is_adding_count_str)] = self.is_adding_count_str
         self.checkbutton_add_count_str = ttk.Checkbutton(
             master=options_frame_buttons,
-            text="Should the script add count string?",
+            text="Add count string?",
             variable=self.is_adding_count_str,
             cursor="hand2",
             command=self.update_options_cb,
@@ -376,7 +376,7 @@ class MainWindow(ttk.Frame):
         self.options_dict[str(self.is_adding_date_str)] = self.is_adding_date_str
         self.checkbutton_add_date_str = ttk.Checkbutton(
             master=options_frame_buttons,
-            text="Should the script add date string?",
+            text="Add date string?",
             variable=self.is_adding_date_str,
             cursor="hand2",
             command=self.update_options_cb,
