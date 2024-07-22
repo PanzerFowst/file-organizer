@@ -43,9 +43,9 @@ class Controller:
             self.model.input_path = input_path
             self.model.output_path = output_path
             self.model.is_safe_mode = options_dict["is_safe_mode"]
+            self.model.is_moving_files = options_dict["is_moving_files"]
             self.model.is_creating_new_directories = options_dict["is_creating_new_directories"]
             self.model.is_deleting_empty_directories = options_dict["is_deleting_empty_directories"]
-            self.model.is_moving_files = options_dict["is_moving_files"]
             self.model.is_adding_count_str = options_dict["is_adding_count_str"]
             self.model.is_adding_date_str = options_dict["is_adding_date_str"]
 

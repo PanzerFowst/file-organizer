@@ -303,6 +303,30 @@ class MainWindow(ttk.Frame):
             master=options_frame_buttons,
             text="...",
         )
+        # Move/Copy Radio Buttons
+        self.is_moving_files = tk.BooleanVar(name="is_moving_files", value=False)
+        self.options_dict[str(self.is_moving_files)] = self.is_moving_files
+        self.move_copy_radio_frame = ttk.Frame(master=options_frame_buttons)
+        self.radiobutton_move_files = ttk.Radiobutton(
+            master=self.move_copy_radio_frame,
+            text="Move Files",
+            variable=self.is_moving_files,
+            value=True,
+            cursor="hand2",
+            command=self.update_options_cb,
+        )
+        self.radiobutton_copy_files = ttk.Radiobutton(
+            master=self.move_copy_radio_frame,
+            text="Copy Files",
+            variable=self.is_moving_files,
+            value=False,
+            cursor="hand2",
+            command=self.update_options_cb,
+        )
+        self.is_moving_files_label = tk.Label(  # ttk.Label(
+            master=options_frame_buttons,
+            text="...",
+        )
         # Create New Directories Checkbox
         self.is_creating_new_directories = tk.BooleanVar(name="is_creating_new_directories", value=False)
         self.options_dict[str(self.is_creating_new_directories)] = self.is_creating_new_directories
@@ -329,30 +353,6 @@ class MainWindow(ttk.Frame):
             command=self.update_options_cb,
         )
         self.is_deleting_empty_directories_label = tk.Label(  # ttk.Label(
-            master=options_frame_buttons,
-            text="...",
-        )
-        # Move/Copy Radio Buttons
-        self.is_moving_files = tk.BooleanVar(name="is_moving_files", value=False)
-        self.options_dict[str(self.is_moving_files)] = self.is_moving_files
-        moveCopyRadioFrame = ttk.Frame(master=options_frame_buttons)
-        self.radiobutton_move_files = ttk.Radiobutton(
-            master=moveCopyRadioFrame,
-            text="Move Files",
-            variable=self.is_moving_files,
-            value=True,
-            cursor="hand2",
-            command=self.update_options_cb,
-        )
-        self.radiobutton_copy_files = ttk.Radiobutton(
-            master=moveCopyRadioFrame,
-            text="Copy Files",
-            variable=self.is_moving_files,
-            value=False,
-            cursor="hand2",
-            command=self.update_options_cb,
-        )
-        self.is_moving_files_label = tk.Label(  # ttk.Label(
             master=options_frame_buttons,
             text="...",
         )
@@ -387,9 +387,6 @@ class MainWindow(ttk.Frame):
             justify="left",
         )
 
-        # Update the options explanation labels:
-        self.update_options_cb()
-
         ##
         ### Place widgets:
 
@@ -399,16 +396,16 @@ class MainWindow(ttk.Frame):
         # Place in options_frame_buttons grids:
         self.checkbutton_safe_mode.grid(row=0, column=0, sticky=tk.W)
         self.is_safe_mode_label.grid(row=0, column=1, sticky=tk.W, padx=(10, 0))
-        self.checkbutton_create_new_dir.grid(row=1, column=0, sticky=tk.NW)
-        self.is_creating_new_directories_label.grid(row=1, column=1, sticky=tk.W, padx=(10, 0))
-        self.checkbutton_delete_empty_dir.grid(row=2, column=0, sticky=tk.W)
-        self.is_deleting_empty_directories_label.grid(row=2, column=1, sticky=tk.W, padx=(10, 0))
 
         self.radiobutton_move_files.pack(side=tk.LEFT)
         self.radiobutton_copy_files.pack(side=tk.LEFT)
-        moveCopyRadioFrame.grid(row=3, column=0, sticky=tk.W)
-        self.is_moving_files_label.grid(row=3, column=1, sticky=tk.W, padx=(10, 0))
+        self.move_copy_radio_frame.grid(row=1, column=0, sticky=tk.W)
+        self.is_moving_files_label.grid(row=1, column=1, sticky=tk.W, padx=(10, 0))
 
+        self.checkbutton_create_new_dir.grid(row=2, column=0, sticky=tk.NW)
+        self.is_creating_new_directories_label.grid(row=2, column=1, sticky=tk.W, padx=(10, 0))
+        self.checkbutton_delete_empty_dir.grid(row=3, column=0, sticky=tk.W)
+        self.is_deleting_empty_directories_label.grid(row=3, column=1, sticky=tk.W, padx=(10, 0))
         self.checkbutton_add_count_str.grid(row=4, column=0, sticky=tk.NW)
         self.is_adding_count_str_label.grid(row=4, column=1, sticky=tk.W, padx=(10, 0))
         self.checkbutton_add_date_str.grid(row=5, column=0, sticky=tk.NW)
@@ -417,6 +414,9 @@ class MainWindow(ttk.Frame):
         # Place subframes:
         options_frame_title.pack(fill=tk.X)
         options_frame_buttons.pack()
+
+        # Update the options explanation labels:
+        self.update_options_cb()
 
         return options_frame
 
@@ -508,10 +508,14 @@ class MainWindow(ttk.Frame):
             self.is_safe_mode_label.configure(
                 text="App will not move or copy any files but still prints their new locations."
             )
+            self.move_copy_radio_frame.grid_remove()
+            self.is_moving_files_label.grid_remove()
         else:
             self.is_safe_mode_label.configure(
                 text="App will %s files to new locations." % ("move" if self.is_moving_files.get() else "copy")
             )
+            self.move_copy_radio_frame.grid()
+            self.is_moving_files_label.grid()
         # TODO: Remove the move/copy radio buttons in the future.
 
         # Creating new directories explanation:

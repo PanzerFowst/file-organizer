@@ -17,9 +17,9 @@ class Model:
         self.ps_script_path: str = "..\\src\\fileRename&Organize.ps1"
 
         self.is_safe_mode: bool = True
+        self.is_moving_files: bool = False
         self.is_creating_new_directories: bool = False
         self.is_deleting_empty_directories: bool = False
-        self.is_moving_files: bool = False
         self.is_adding_count_str: bool = True
         self.is_adding_date_str: bool = False
 
@@ -35,7 +35,7 @@ class Model:
         if os.path.exists(path):
             self.__input_path = os.path.abspath(path)
         else:
-            raise ValueError(f'Invalid file path: {path}')
+            raise ValueError(f'Invalid input file path: {path}')
 
     @property
     def output_path(self) -> str:
@@ -67,9 +67,9 @@ class Model:
                 "-input_path:", self.input_path,
                 "-output_path:", self.output_path,
                 "-is_safe_mode:", bool_to_ps_string(self.is_safe_mode),
+                "-is_moving_files:", bool_to_ps_string(self.is_moving_files),
                 "-is_creating_new_directories:", bool_to_ps_string(self.is_creating_new_directories),
                 "-is_deleting_empty_directories:", bool_to_ps_string(self.is_deleting_empty_directories),
-                "-is_moving_files:", bool_to_ps_string(self.is_moving_files),
                 "-is_adding_count_str:", bool_to_ps_string(self.is_adding_count_str),
                 "-is_adding_date_str:", bool_to_ps_string(self.is_adding_date_str),
             ]

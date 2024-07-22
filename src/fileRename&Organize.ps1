@@ -20,9 +20,9 @@ param(
     [string]$output_path,
     [string]$recursive = "true", # TODO: Add this option later...
     [string]$is_safe_mode = "true", # default value if not assigned
+    [string]$is_moving_files = "false",
     [string]$is_creating_new_directories = "false",   # TODO: Remove this option later...
     [string]$is_deleting_empty_directories = "false",
-    [string]$is_moving_files = "false",
     [string]$is_adding_count_str = "true",
     [string]$is_adding_date_str = "false",
     $envname
@@ -34,9 +34,9 @@ Write-Host "PowerShell Process ID (PID): $PID`n`n"
 # Convert string boolean values to actual Booleans
 [bool]$recursive = [System.Convert]::ToBoolean($recursive)
 [bool]$is_safe_mode = [System.Convert]::ToBoolean($is_safe_mode)
+[bool]$is_moving_files = [System.Convert]::ToBoolean($is_moving_files)
 [bool]$is_creating_new_directories = [System.Convert]::ToBoolean($is_creating_new_directories)
 [bool]$is_deleting_empty_directories = [System.Convert]::ToBoolean($is_deleting_empty_directories)
-[bool]$is_moving_files = [System.Convert]::ToBoolean($is_moving_files)
 [bool]$is_adding_count_str = [System.Convert]::ToBoolean($is_adding_count_str)
 [bool]$is_adding_date_str = [System.Convert]::ToBoolean($is_adding_date_str)
 
@@ -68,15 +68,15 @@ try {
 
 # Read Only (If true, just prints potential files to console without copying or moving the files):
 $isReadOnly = $is_safe_mode
+# Copy or Move file:
+#   If true, script moves and modifies the original file.
+#   If false, script copies files without modifying old file.
+$isTouchingOriginalFiles = $is_moving_files
 
 # Directory Creation (Should the script create folders if they don't exist?):
 $isCreatingDirectories = $is_creating_new_directories
 # Empty Directory Deletion (Should the script delete folders if they are empty from the basepath (input) path?):
 $isDeletingEmptyDirectories = $is_deleting_empty_directories
-# Copy or Move file:
-#   If true, script moves and modifies the original file.
-#   If false, script copies files without modifying old file.
-$isTouchingOriginalFiles = $is_moving_files
 # Add count string to file end:
 #   Should the script add "@000" to the end in cases of same file names?
 #   Example: file@000.txt, file@001.txt, file@002.txt, fileCOOL@000.txt
