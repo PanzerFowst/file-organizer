@@ -17,7 +17,7 @@ def main():
     model = Model()
 
     # create a view
-    view = View(versionMajorMinor=(VERSION, MAJOR, MINOR))
+    view = View(version_major_minor=(VERSION, MAJOR, MINOR))
 
     # create a controller (might technically be called a presenter?)
     controller = Controller(model, view)

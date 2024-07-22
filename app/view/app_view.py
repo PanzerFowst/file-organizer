@@ -13,12 +13,12 @@ class Controller(Protocol):
 
 
 class View(tk.Tk):
-    def __init__(self, versionMajorMinor: tuple[int, int, int]):
+    def __init__(self, version_major_minor: tuple[int, int, int]):
         super().__init__()
 
-        self.VERSION: int = versionMajorMinor[0]
-        self.MAJOR: int = versionMajorMinor[1]
-        self.MINOR: int = versionMajorMinor[2]
+        self.VERSION: int = version_major_minor[0]
+        self.MAJOR: int = version_major_minor[1]
+        self.MINOR: int = version_major_minor[2]
 
         # Title of the window:
         self.title("File Lister")
@@ -191,26 +191,26 @@ class MainWindow(ttk.Frame):
         run_paths_frame_options = ttk.Frame(master=run_paths_frame)
 
         # Label for the filepath row header
-        LabelInputPath = tk.Label(  # ttk.Label(
+        input_path_label = tk.Label(  # ttk.Label(
             master=run_paths_frame_options,
             text="Input Path: ",
             bg='#f3f0ea',
         )
         # Label for the output path row header
-        LabelOutputPath = tk.Label(  # ttk.Label(
+        output_path_label = tk.Label(  # ttk.Label(
             master=run_paths_frame_options,
             text="Output Path: ",
             bg='#f3f0ea',
         )
 
         # Label for the filepath text
-        self.LabelSelectedInputPath = tk.Label(  # ttk.Label(
+        self.label_selected_input_path = tk.Label(  # ttk.Label(
             master=run_paths_frame_options,
             text="Select the input path.",
             bg='#f3f0ea',
         )
         # Label for the output path text
-        self.LabelSelectedOutputPath = tk.Label(  # ttk.Label(
+        self.label_selected_output_path = tk.Label(  # ttk.Label(
             master=run_paths_frame_options,
             text="Select an output path.",
             bg='#f3f0ea',
@@ -250,11 +250,11 @@ class MainWindow(ttk.Frame):
         # Place in run_paths_frame_options grids:
         run_paths_frame_options.grid_rowconfigure(index=(0, 1), weight=1, uniform='a')
 
-        LabelInputPath.grid(row=0, column=0, sticky=tk.E)
-        LabelOutputPath.grid(row=1, column=0, sticky=tk.E)
+        input_path_label.grid(row=0, column=0, sticky=tk.E)
+        output_path_label.grid(row=1, column=0, sticky=tk.E)
 
-        self.LabelSelectedInputPath.grid(row=0, column=1, sticky=tk.W)
-        self.LabelSelectedOutputPath.grid(row=1, column=1, sticky=tk.W)
+        self.label_selected_input_path.grid(row=0, column=1, sticky=tk.W)
+        self.label_selected_output_path.grid(row=1, column=1, sticky=tk.W)
 
         self.button_input_browse.grid(row=0, column=2, sticky=tk.EW)
         self.button_output_browse.grid(row=1, column=2, sticky=tk.EW)
@@ -439,7 +439,7 @@ class MainWindow(ttk.Frame):
         ## Button options for the options_frame:
         progress_frame_status = ttk.Frame(master=progress_frame)
 
-        # Add progressbar
+        # Add progressbar:
         self.progressbar = ttk.Progressbar(
             progress_frame_status,
             orient='horizontal',
@@ -448,7 +448,7 @@ class MainWindow(ttk.Frame):
         )
         self.progressbar.start(3)
 
-        # TODO: Add a text box or something to print data received from the model...
+        # Add text box for displaying the output from the script:
         self.progress_display_text = scrolledtext.ScrolledText(
             master=progress_frame_status,
             wrap='word',
@@ -516,7 +516,6 @@ class MainWindow(ttk.Frame):
             )
             self.move_copy_radio_frame.grid()
             self.is_moving_files_label.grid()
-        # TODO: Remove the move/copy radio buttons in the future.
 
         # Creating new directories explanation:
         if self.is_recursive_search.get():
@@ -615,11 +614,8 @@ class MainWindow(ttk.Frame):
             # Do nothing if the path is empty or not valid:
             return
 
-        # Hide and forget button after push (user cannot bring this button back):
-        # TODO: Should this button always exist?
-        # self.button_input_browse.grid_forget()
         # Update text label with file path:
-        self.LabelSelectedInputPath.configure(text=self.input_path, bg='#f3f0ea')
+        self.label_selected_input_path.configure(text=self.input_path, bg='#f3f0ea')
         # Call checkbox callback to update in case box is checked:
         self.check_button_create_output_dir_cb()
         # Update 'Run' button status:
@@ -633,11 +629,8 @@ class MainWindow(ttk.Frame):
             # Do nothing if the path is empty or not valid:
             return
 
-        # Hide but remember button after push (in case user unchecks box):
-        # TODO: Should this button always exist and only be removed by the checkbox?
-        # self.button_output_browse.grid_remove()
         # Update text label with file path
-        self.LabelSelectedOutputPath.configure(text=self.output_path, bg='#f3f0ea')
+        self.label_selected_output_path.configure(text=self.output_path, bg='#f3f0ea')
         # Update 'Run' button status:
         self.check_if_ready_to_run()
 
@@ -652,13 +645,14 @@ class MainWindow(ttk.Frame):
                 self.output_path = temp
             else:
                 temp = "Select an input path."
-            self.LabelSelectedOutputPath.configure(text=temp)
+            self.label_selected_output_path.configure(text=temp)
         else:
             # Show the output browse button when checkbox is not selected:
             self.button_output_browse.grid()
             # Clear output path:
-            self.output_path = ""
-            self.LabelSelectedOutputPath.configure(text="Select an output path.")
+            if not path.exists(self.output_path):
+                self.output_path = ""
+                self.label_selected_output_path.configure(text="Select an output path.")
 
         # Update 'Run' button status:
         self.check_if_ready_to_run()
