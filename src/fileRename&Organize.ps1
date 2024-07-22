@@ -48,16 +48,22 @@ Write-Host "PowerShell Process ID (PID): $PID`n`n"
 
 # Basepath / directory (set this to make the "home directory out of which everything is created."):
 try {
+    # Basepath / input directory:
     [System.IO.DirectoryInfo]$basepath = Convert-Path $input_path
-    # [string]$output_path = Convert-Path $output_path
-    if ($is_creating_new_directories -and !(Test-Path $output_path)) {
-        "Output path doesn't exist!  Creating output path..."
-        New-Item -ItemType Directory -Path "$output_path"
+
+    # Destination / output directory:
+    if ($is_safe_mode) {
+        [System.IO.DirectoryInfo]$destinationpath = $null
+    } else {
+        if (!(Test-Path $output_path)) {
+            "Output path doesn't exist!  Creating output path..."
+            New-Item -ItemType Directory -Path "$output_path"
+        }
+        if (-not (Test-Path $output_path)) {
+            throw "Output path does not exist...  Please either create it or allow the App to create it by selecting the checkbox."
+        }
+        [System.IO.DirectoryInfo]$destinationpath = Convert-Path $output_path
     }
-    if (-not (Test-Path $output_path)) {
-        throw "Output path does not exist...  Please either create it or allow the App to create it by selecting the checkbox."
-    }
-    [System.IO.DirectoryInfo]$destinationpath = Convert-Path $output_path
 } catch {
     Write-Host "Exception occurred: $_"
     Write-Host "Exiting..."
