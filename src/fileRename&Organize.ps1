@@ -271,7 +271,7 @@ foreach ($file in $files) {
         } while (Test-Path "$newPath$newName")
 
     } else {
-        $newName = "$nameOnly$extOnly"
+        $newName = "$Name_Date_Str$extOnly"
     }
 
     # Display the new path and name:
