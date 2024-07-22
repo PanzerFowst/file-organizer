@@ -18,10 +18,9 @@ param(
     })]
     [System.IO.DirectoryInfo]$input_path,
     [string]$output_path,
-    [string]$recursive = "true", # TODO: Add this option later...
     [string]$is_safe_mode = "true", # default value if not assigned
     [string]$is_moving_files = "false",
-    [string]$is_creating_new_directories = "false",   # TODO: Remove this option later...
+    [string]$is_recursive_search = "true",
     [string]$is_deleting_empty_directories = "false",
     [string]$is_adding_count_str = "true",
     [string]$is_adding_date_str = "false",
@@ -32,10 +31,9 @@ Write-Host "PowerShell Process ID (PID): $PID`n`n"
 
 
 # Convert string boolean values to actual Booleans
-[bool]$recursive = [System.Convert]::ToBoolean($recursive)
 [bool]$is_safe_mode = [System.Convert]::ToBoolean($is_safe_mode)
 [bool]$is_moving_files = [System.Convert]::ToBoolean($is_moving_files)
-[bool]$is_creating_new_directories = [System.Convert]::ToBoolean($is_creating_new_directories)
+[bool]$is_recursive_search = [System.Convert]::ToBoolean($is_recursive_search)
 [bool]$is_deleting_empty_directories = [System.Convert]::ToBoolean($is_deleting_empty_directories)
 [bool]$is_adding_count_str = [System.Convert]::ToBoolean($is_adding_count_str)
 [bool]$is_adding_date_str = [System.Convert]::ToBoolean($is_adding_date_str)
@@ -73,8 +71,6 @@ $isReadOnly = $is_safe_mode
 #   If false, script copies files without modifying old file.
 $isTouchingOriginalFiles = $is_moving_files
 
-# Directory Creation (Should the script create folders if they don't exist?):
-$isCreatingDirectories = $is_creating_new_directories
 # Empty Directory Deletion (Should the script delete folders if they are empty from the basepath (input) path?):
 $isDeletingEmptyDirectories = $is_deleting_empty_directories
 # Add count string to file end:
@@ -119,8 +115,11 @@ function RemoveAllEmptyFolders {
 
 # -Recurse looks into all subdirectories.  Leave the option out to only look at current
 # directory.  The results are piped into Where-Object which filters by file extension.
-$AllChildren = Get-ChildItem -Exclude "*.ps1" -Recurse -Path "$basepath" # |
-# Where-Object { $_.Extension -match "(jpg|jpeg|png|raw|mp4|mov|heic|aae)" }
+$AllChildren = if ($is_recursive_search) {
+    Get-ChildItem -Exclude "*.ps1" -Path "$basepath" -Recurse
+} else {
+    Get-ChildItem -Exclude "*.ps1" -Path "$basepath"
+} # | Where-Object { $_.Extension -match "(jpg|jpeg|png|raw|mp4|mov|heic|aae)" }
 # TODO: Add an option to include more file extension types...
 # Filter down to only File Objects:
 $files = $AllChildren | Where-Object { !$_.PSisContainer }
@@ -293,8 +292,8 @@ foreach ($file in $files) {
 
     if (!($isReadOnly)) {
 
-        # Directory Creation:
-        if ($isCreatingDirectories -and !(Test-Path $newPath)) {
+        # Empty Directory Creation:
+        if (!(Test-Path $newPath)) {
 
             "Path doesn't exist!  Creating path..."
             New-Item -ItemType Directory -Path "$newPath"
@@ -328,12 +327,6 @@ if ($isDeletingEmptyDirectories) {
 
 # Final output:
 "`n`n******************************************************************************`n"
-
-if ($isCreatingDirectories) {
-    "Potentially new directories created!"
-} else {
-    "Did not create any directories."
-}
 
 if ($isDeletingEmptyDirectories) {
     "Deleted all empty folders in `"$basepath\`"!"

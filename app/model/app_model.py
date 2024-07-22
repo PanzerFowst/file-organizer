@@ -18,7 +18,7 @@ class Model:
 
         self.is_safe_mode: bool = True
         self.is_moving_files: bool = False
-        self.is_creating_new_directories: bool = False
+        self.is_recursive_search: bool = False
         self.is_deleting_empty_directories: bool = False
         self.is_adding_count_str: bool = True
         self.is_adding_date_str: bool = False
@@ -68,7 +68,7 @@ class Model:
                 "-output_path:", self.output_path,
                 "-is_safe_mode:", bool_to_ps_string(self.is_safe_mode),
                 "-is_moving_files:", bool_to_ps_string(self.is_moving_files),
-                "-is_creating_new_directories:", bool_to_ps_string(self.is_creating_new_directories),
+                "-is_recursive_search:", bool_to_ps_string(self.is_recursive_search),
                 "-is_deleting_empty_directories:", bool_to_ps_string(self.is_deleting_empty_directories),
                 "-is_adding_count_str:", bool_to_ps_string(self.is_adding_count_str),
                 "-is_adding_date_str:", bool_to_ps_string(self.is_adding_date_str),

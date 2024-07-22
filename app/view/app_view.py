@@ -328,16 +328,16 @@ class MainWindow(ttk.Frame):
             text="...",
         )
         # Create New Directories Checkbox
-        self.is_creating_new_directories = tk.BooleanVar(name="is_creating_new_directories", value=False)
-        self.options_dict[str(self.is_creating_new_directories)] = self.is_creating_new_directories
-        self.checkbutton_create_new_dir = ttk.Checkbutton(
+        self.is_recursive_search = tk.BooleanVar(name="is_recursive_search", value=False)
+        self.options_dict[str(self.is_recursive_search)] = self.is_recursive_search
+        self.checkbutton_recursive_search_dir = ttk.Checkbutton(
             master=options_frame_buttons,
-            text="Should the script create folders if they don't exist?",
-            variable=self.is_creating_new_directories,
+            text="Should the script search folder and subfolders?",
+            variable=self.is_recursive_search,
             cursor="hand2",
             command=self.update_options_cb,
         )
-        self.is_creating_new_directories_label = tk.Label(  # ttk.Label(
+        self.is_recursive_search_label = tk.Label(  # ttk.Label(
             master=options_frame_buttons,
             text="...",
             justify="left",
@@ -402,8 +402,8 @@ class MainWindow(ttk.Frame):
         self.move_copy_radio_frame.grid(row=1, column=0, sticky=tk.W)
         self.is_moving_files_label.grid(row=1, column=1, sticky=tk.W, padx=(10, 0))
 
-        self.checkbutton_create_new_dir.grid(row=2, column=0, sticky=tk.NW)
-        self.is_creating_new_directories_label.grid(row=2, column=1, sticky=tk.W, padx=(10, 0))
+        self.checkbutton_recursive_search_dir.grid(row=2, column=0, sticky=tk.NW)
+        self.is_recursive_search_label.grid(row=2, column=1, sticky=tk.W, padx=(10, 0))
         self.checkbutton_delete_empty_dir.grid(row=3, column=0, sticky=tk.W)
         self.is_deleting_empty_directories_label.grid(row=3, column=1, sticky=tk.W, padx=(10, 0))
         self.checkbutton_add_count_str.grid(row=4, column=0, sticky=tk.NW)
@@ -519,14 +519,13 @@ class MainWindow(ttk.Frame):
         # TODO: Remove the move/copy radio buttons in the future.
 
         # Creating new directories explanation:
-        if self.is_creating_new_directories.get():
-            self.is_creating_new_directories_label.configure(
-                text="App will create a new folder if folder does not already exist."
+        if self.is_recursive_search.get():
+            self.is_recursive_search_label.configure(
+                text="App will recursively search input folder and all subfolders."
             )
         else:
-            self.is_creating_new_directories_label.configure(
-                text="App will not create new folders.  This may cause problems if the destination folder\n" +
-                "does not exist."
+            self.is_recursive_search_label.configure(
+                text="App will only search the input folder and ignore any subfolders."
             )
 
         # Deleting empty directories explanation:
