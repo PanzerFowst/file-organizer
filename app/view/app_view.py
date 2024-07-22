@@ -563,7 +563,7 @@ class MainWindow(ttk.Frame):
         if self.is_adding_date_str.get():
             self.is_adding_date_str_label.configure(
                 text="App will add the date to the end of the file name.\n" +
-                "Example: FILL IN EXAMPLES HERE..."
+                "Example: file---2023-06-01__10;12;46.09325.txt, picture---2020-01-31__20;59;22.txt"
             )
         else:
             self.is_adding_date_str_label.configure(text="App will not add date strings.")

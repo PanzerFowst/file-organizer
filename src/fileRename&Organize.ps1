@@ -78,7 +78,7 @@ $isDeletingEmptyDirectories = $is_deleting_empty_directories
 #   Example: file@000.txt, file@001.txt, file@002.txt, fileCOOL@000.txt
 $isAddingCountString = $is_adding_count_str
 # Add datestrings to end of file (Should the script add a datestring to the file name?):
-# TODO: Add examples here...
+#   Example: file---2023-06-01__10;12;46.09325.txt, picture---2020-01-31__20;59;22.txt
 $isAddingDateStrings = $is_adding_date_str
 
 
